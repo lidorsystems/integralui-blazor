@@ -1,0 +1,93 @@
+﻿[id="treeview-dragdrop-events"] {
+    --iui-treeview-display: inline-block;
+    --iui-treeview-height: 100%;
+    --iui-treeview-width: 45%;
+}
+[id="treeview-dragenter"] {
+    --iui-treeview-display: inline-block;
+    --iui-treeview-height: 100%;
+    --iui-treeview-width: 45%;
+    --iui-treeview-box-shadow: 0 0 5px #5c9ce0;
+}
+.trw-ddev-icons {
+    background: url(/resources/icons-x24.png) no-repeat 0 0;
+    display: inline-block;
+    padding: 0;
+    margin: 0 3px;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+.collapsed {
+    background-position: -120px -144px;
+}
+
+.expanded {
+    background-position: -144px -144px;
+}
+.document {
+    background-position: 0 -96px;
+}
+
+[id="list-dragdrop-events-log"] {
+    --iui-list-border: 0;
+    --iui-list-margin: 0;
+    --iui-list-height: calc(100% - 45px);
+    --iui-list-width: 100%;
+    --iui-listitem-padding: 5px 0;
+    --iui-listitem-white-space: normal;
+}
+
+.sample-block-treeview-dragdrop-events {
+    height: 400px;
+    padding: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.sample-event-block {
+    background: white;
+    border: thin solid #d9d9d9;
+    display: inline-block;
+    height: 100%;
+    margin: 0 0 0 32px;
+    overflow: hidden;
+    width: calc(55% - 44px);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+[id="treeview-dragdrop-events-button"] {
+    --iui-button-float: right;
+    --iui-button-margin: 5px 5px 5px 12px;
+    --iui-button-padding: 5px;
+    --iui-button-width: 75px;
+}
+.sample-event-block p {
+    border-bottom: thin solid #e5e5e5;
+    margin: 0;
+    padding: 10px 5px;
+}
+.sample-event-count {
+    background: #808080;
+    border-radius: 3px;
+    color: white;
+    display: inline-block;
+    margin: 0 5px 0 0;
+    padding: 2px 3px;
+}
+.sample-event-name {
+    color: #aa0000;
+}
+.sample-event-value {
+    color: #0000aa;
+}
+.sample-event-cancelled {
+    color: red;
+    display: inline-block;
+    margin-left: 5px;
+}

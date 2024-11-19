@@ -1,0 +1,128 @@
+﻿@page "/treeview/overview"
+
+<h2>TreeView / Overview</h2>
+<div class="sample-block">
+    <IntegralUITreeView @ref=treeRef
+        CheckBoxes="true"
+        CheckMode="IntegralUICheckMode.ThreeState"
+        Id="treeview-overview"
+        TItem="CustomItem" 
+        AllowDrag="true" 
+        AllowDrop="true" 
+        Items="@items" 
+        Size="@ctrlSize" 
+        ToolbarVisibility="IntegralUIContentVisibility.Hover | IntegralUIContentVisibility.Select"
+    >
+        <ItemTemplate>
+            <span class="@getIconClass(@context.Item)"></span>
+            <span class="trw-overview-item-label">@context.Item?.Text</span>
+        </ItemTemplate>
+        <ToolbarTemplate>
+            <div>
+                <span class="trw-overview-tool-delete" @onclick="() => deleteItem(context.Item)"></span>
+            </div>
+        </ToolbarTemplate>
+    </IntegralUITreeView>
+    <div class="feature-help">
+        <p><span class="initial-space"></span><strong><span class="code-name">IntegralUI</span> TreeView</strong> is a Blazor Component that displays tree hierarchy of items that can be reordered using advanced drag drop operations. You can load data on demand during run-time from local or remote data sources, and add custom HTML content in each tree item.</p>
+        <p><span class="initial-space"></span>Above demonstration shows a simple tree hierarchy, each item has an icon and a label. When item is hovered or selected, a command button will appear on right side, which when clicked will remove the item from tree hirarachy.</p>
+        <p><span class="initial-space"></span>You can reorder items by click and drag over specific item. A dragging window will appear, stating the target item and position at which item can be dropped.</p>
+    </div>
+</div>
+
+@code {
+
+    public IntegralUISize ctrlSize = new() { Width = 500, Height = 400 };
+    private IntegralUITreeView<CustomItem>? treeRef;
+
+    public class CustomItem
+    {
+        public IntegralUICheckState CheckState { get; set; } = IntegralUICheckState.Unchecked;
+        public bool Expanded { get; set; } = true;
+        public string? Id { get; set; }
+        public string? Icon { get; set; }
+        public List<CustomItem> Items { get; set; } = [];
+        public string? ParentId { get; set; }
+        public bool Selected { get; set; } = false;
+        public string? Text { get; set; }
+    }
+
+    public List<CustomItem> items = new()
+    {
+        new CustomItem
+        { 
+            Id = "1", 
+            Icon = "favorites",
+            Text = "Favorites",
+            Items = new()
+            {
+                new CustomItem { Id = "11", ParentId = "1", Icon = "empty-doc", Text = "Desktop" },
+                new CustomItem { Id = "12", ParentId = "1", Icon = "downloads", Text = "Downloads", CheckState = IntegralUICheckState.Checked },
+            }
+        },
+        new CustomItem
+        {
+            Id = "2",
+            Icon = "folder",
+            Text = "Libraries",
+            Items = new()
+            {
+                new CustomItem
+                {
+                    Id = "21",
+                    ParentId = "2",
+                    Icon = "folder",
+                    Text = "Documents",
+                    Expanded = false,
+                    Items = new()
+                    {
+                        new CustomItem { Id = "211", ParentId = "21", Icon = "empty-doc", Text = "My Documents" },
+                        new CustomItem { Id = "212", ParentId = "21", Icon = "empty-doc", Text = "Public Documents" },
+                    }
+                },
+                new CustomItem { Id = "22", ParentId = "2", Icon = "music", Text = "Music" },
+                new CustomItem { Id = "23", ParentId = "2", Icon = "pictures", Text = "Pictures", CheckState = IntegralUICheckState.Checked },
+                new CustomItem { Id = "24", ParentId = "2", Icon = "videos", Text = "Videos" },
+           }
+        },
+        new CustomItem
+        {
+            Id = "3",
+            Icon = "pc",
+            Text = "Computer",
+            Items = new()
+            {
+                new CustomItem { Id = "31", ParentId = "3", Icon = "disk", Text = "Local Disk (C:)", CheckState = IntegralUICheckState.Checked },
+                new CustomItem { Id = "32", ParentId = "3", Icon = "disk", Text = "Storage (D:)", CheckState = IntegralUICheckState.Checked },
+            }
+        },
+        new CustomItem { Id = "4", Icon = "network", Text = "Network" },
+        new CustomItem { Id = "5", Icon = "recycle", Text = "Recycle Bin" }
+   };
+
+    // Methods ---------------------------------------------------------------------------------------------------------------
+
+    private void deleteItem(CustomItem? item)
+    {
+        if (item is not null)
+            treeRef?.RemoveItem(item);
+    }
+
+    private string getIconClass(CustomItem? item)
+    {
+        string className = "computer-icons";
+
+        if (item is not null)
+        {
+            if (!string.IsNullOrEmpty(item.Icon))
+                className += $" {item.Icon}";
+            else if (item.Items.Count > 0)
+                className += $" folder";
+            else
+                className += $" empty-doc";
+        }
+
+        return className;
+    }
+
+}

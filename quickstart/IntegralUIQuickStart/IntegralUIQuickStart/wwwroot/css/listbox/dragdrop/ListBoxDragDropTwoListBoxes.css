@@ -1,0 +1,20 @@
+﻿[id="listbox-1"] {
+    --iui-listbox-float: left;
+    --iui-listbox-margin: 0 20px 0 0;
+}
+
+[id="listbox-2"] {
+    --iui-listbox-float: left;
+    --iui-listbox-margin: 0 20px 0 0;
+}
+
+.sample-block-listbox-dragdrop-two-lists {
+    display: inline-block;
+    margin-top: 20px
+}
+.sample-block-listbox-dragdrop-two-lists > div {
+    float: left;
+    width: 350px;
+
+    --iui-checkbox-margin: 0 10px;
+}

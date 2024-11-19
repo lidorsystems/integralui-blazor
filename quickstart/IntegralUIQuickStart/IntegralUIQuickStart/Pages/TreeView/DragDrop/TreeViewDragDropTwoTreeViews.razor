@@ -1,0 +1,148 @@
+﻿@using System.Text.Json
+
+@page "/treeview/dragdrop/between-treeviews"
+
+<link rel="stylesheet" href="css/treeview/dragdrop/TreeViewDragDropTwoTreeViews.css?version=24.3.0" />
+
+<h2>TreeView / Drag Drop between TreeViews</h2>
+<div class="sample-block">
+    <IntegralUITreeView Id="treeview-1" TItem="CustomItem"
+                       AllowDrag="@allowDrag"
+                       AllowDrop="@allowDrop"
+                       Items="@items"
+                       SelectionMode="IntegralUISelectionMode.MultiExtended"
+                       Size="@ctrlSize">
+        <ItemTemplate>
+            <span class="@getIconClass(@context.Item)"></span>
+            <span>@context.Item?.Text</span>
+        </ItemTemplate>
+    </IntegralUITreeView>
+    <IntegralUITreeView Id="treeview-2" TItem="CustomItem"
+                       AllowDrag="@allowDrag2"
+                       AllowDrop="@allowDrop2"
+                       Items="@items2"
+                       SelectionMode="IntegralUISelectionMode.MultiExtended"
+                       Size="@ctrlSize">
+        <ItemTemplate>
+            <span class="@getIconClass(@context.Item)"></span>
+            <span>@context.Item?.Text</span>
+        </ItemTemplate>
+    </IntegralUITreeView>
+    <br style="clear:both;" />
+    <div class="sample-block-treeview-dragdrop-two-lists" style="">
+        <div style="margin-right:30px" align="center">
+            <IntegralUICheckBox @bind-Checked="@allowDrag">Allow Drag</IntegralUICheckBox>
+            <IntegralUICheckBox @bind-Checked="@allowDrop">Allow Drop</IntegralUICheckBox>
+        </div>
+        <div align="center">
+            <IntegralUICheckBox @bind-Checked="@allowDrag2">Allow Drag</IntegralUICheckBox>
+            <IntegralUICheckBox @bind-Checked="@allowDrop2">Allow Drop</IntegralUICheckBox>
+        </div>
+        <br style="clear:both;" />
+    </div>
+    <div class="feature-help">
+        <p><span class="initial-space"></span>In this sample you can drag drop items between two TreeView components. The Dynamic drag and drop is active, which means when one or more items are dragged all other items will move and show the target position at which dragged items can drop.</p>
+        <p><span class="initial-space"></span>To create a copy of a dragged item(s), holding the SHIFT key just before item(s) are dropped.</p>
+        <p><span class="initial-space"></span>By clicking on check boxes, you can change these properties:</p>
+        <ul class="feature-points">
+            <li><span class="code-name">AllowDrag</span> - determines whether item(s) can be dragged</li>
+            <li><span class="code-name">AllowDrop</span> - determines whether item(s) can be dropped</li>
+        </ul>
+    </div>
+</div>
+
+@code {
+
+    public class CustomItem
+    {
+        public bool Expanded { get; set; } = true;
+        public string? Id { get; set; }
+        public string? Icon { get; set; }
+        public List<CustomItem> Items { get; set; } = [];
+        public string? ParentId { get; set; }
+        public bool Selected { get; set; } = false;
+        public string? Text { get; set; }
+    }
+
+    public IntegralUISize ctrlSize = new() { Width = 350, Height = 400 };
+    public string currentGroupBy = "";
+
+    public List<CustomItem> items = new()
+    {
+        new CustomItem
+        {
+            Id = "1",
+            Text = "Favorites",
+            Items = new()
+            {
+                new CustomItem { Id = "11", ParentId = "1", Text = "Desktop" },
+                new CustomItem { Id = "12", ParentId = "1", Text = "Downloads" },
+            }
+        },
+        new CustomItem
+        {
+            Id = "2",
+            Text = "Libraries",
+            Expanded = false,
+            Items = new()
+            {
+                new CustomItem
+                {
+                    Id = "21",
+                    ParentId = "2",
+                    Text = "Documents",
+                    Expanded = false,
+                    Items = new()
+                    {
+                        new CustomItem { Id = "211", ParentId = "21", Text = "My Documents" },
+                        new CustomItem { Id = "212", ParentId = "21", Text = "Public Documents" },
+                    }
+                },
+                new CustomItem { Id = "22", ParentId = "2", Text = "Music" },
+                new CustomItem { Id = "23", ParentId = "2", Text = "Pictures" },
+                new CustomItem { Id = "24", ParentId = "2", Text = "Videos" },
+           }
+        }
+    };
+
+    public List<CustomItem> items2 = new()
+    {
+        new CustomItem
+        {
+            Id = "3",
+            Icon = "pc",
+            Text = "Computer",
+            Items = new()
+            {
+                new CustomItem { Id = "31", ParentId = "3", Text = "Local Disk (C:)" },
+                new CustomItem { Id = "32", ParentId = "3", Text = "Storage (D:)" },
+            }
+        },
+        new CustomItem { Id = "4", Text = "Network" },
+        new CustomItem { Id = "5", Text = "Recycle Bin" }
+    };
+
+    // Control PaneL
+    public bool allowDrag = true;
+    public bool allowDrop = true;
+
+    public bool allowDrag2 = true;
+    public bool allowDrop2 = true;
+
+    // Styling ---------------------------------------------------------------------------------------------------------------
+
+    private string getIconClass(CustomItem? item)
+    {
+        string className = "trw-dd2trw-icons";
+
+        if (item is not null)
+        {
+            if (item.Items.Count > 0)
+                className += item.Expanded ? " expanded" : " collapsed";
+            else
+                className += " document";
+        }
+
+        return className;
+    }
+}

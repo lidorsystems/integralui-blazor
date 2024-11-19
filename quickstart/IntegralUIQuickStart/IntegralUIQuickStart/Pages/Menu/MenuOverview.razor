@@ -1,0 +1,321 @@
+﻿@page "/menu/overview"
+
+@implements IDisposable
+
+<link rel="stylesheet" href="css/menu/MenuOverview.css?version=24.3.0" />
+
+<h2>Menu / Overview</h2>
+<div class="sample-block">
+    <IntegralUIMenu @ref="menuRef" Id="menu-overview" TItem="CustomMenuItem" Items="@items" MenuClick="@menuClick" CheckedChanged="@menuChecked">
+        <ItemTemplate>
+            @if (context.Item?.Text == "Zoom")
+            {
+                <div class="menu-ovwtpl-block">
+                    <span class="menu-ovwtpl-label">@context.Item?.Text</span>
+                    <div class="menu-ovwtpl-zoom-block" @onmouseup="preventClosing" @onclick:stopPropagation="true">
+                        <span class="menu-ovwtpl-zoom-out" @onmousedown="@(e => zoomOut(e, context.Item))">-</span>
+                        <span class="menu-ovwtpl-zoom-value">@context.Item?.ZoomValue%</span>
+                        <span class="menu-ovwtpl-zoom-in" @onmousedown="@(e => zoomIn(e, context.Item))">+</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <span class="iui-menuitem-label">@context.Item?.Text</span>
+            }
+        </ItemTemplate>
+    </IntegralUIMenu>
+    <div class="menu-overview-block">
+        <span style="@getContentStyle()">Sample Content Block</span>
+    </div>
+    <div class="feature-help">
+        <p><span class="initial-space"></span><strong><span class="code-name">IntegralUI</span> Menu</strong> is a Blazor Component that allows you to create static and dynamic menus. You can populate the menu directly in your HTML or using a custom data source, either locally or remotely.</p>
+        <p><span class="initial-space"></span>In this example, we have a menu with four root menu items. Each menu has an icon, label and expand mark if there are child items. Whenever mouse cursor hovers over a menu item, an animation will start showing a window with child items. By clicking on menu item, a message will appear in the console window, stating the menu item that was clicked.</p>
+    </div>
+</div>
+
+@code {
+
+    // General
+    private bool _disposedValue = false;
+
+    // References
+    private IntegralUIMenu<CustomMenuItem>? menuRef;
+
+    // Timers
+    protected System.Threading.Timer? zoomInterval;
+
+    // Destruction -----------------------------------------------------------------------------------------------------------
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                clearZoomInterval();
+            }
+
+            _disposedValue = true;
+        }
+    }
+
+    protected void clearZoomInterval()
+    {
+        if (zoomInterval is not null)
+            zoomInterval.Dispose();
+
+        zoomInterval = null;
+    }
+
+    // Data ------------------------------------------------------------------------------------------------------------------
+
+    public double currentZoomValue = 250;
+
+    private class CustomMenuItem
+    {
+        public bool AllowCheck { get; set; } = false;
+        public bool AllowRadio { get; set; } = false;
+        public bool Checked { get; set; } = false;
+        public bool Enabled { get; set; } = true;
+        public string? Id { get; set; }
+        public List<CustomMenuItem> Items { get; set; } = [];
+        public string? ParentId { get; set; }
+        public string? Text { get; set; }
+        public IntegralUIMenuItemType Type { get; set; } = IntegralUIMenuItemType.Item;
+        public double ZoomValue { get; set; } = 0;
+    }
+
+    private List<CustomMenuItem> items = new()
+    {
+        new CustomMenuItem
+        {
+            Id = "1",
+            Text = "File",
+            Items = new()
+            {
+                new CustomMenuItem
+                {
+                    Id = "11",
+                    ParentId = "1",
+                    Text = "New",
+                    Items = new()
+                    {
+                        new CustomMenuItem { Id = "111", ParentId = "11", Text = "Project" },
+                        new CustomMenuItem { Id = "112", ParentId = "11", Text = "Window" }
+                    }
+                },
+                new CustomMenuItem { Id = "12", ParentId = "1", Text = "Open" },
+                new CustomMenuItem { Id = "13", ParentId = "1", Text = "Save As..." },
+                new CustomMenuItem { Id = "14", ParentId = "1", Text = "Save All" },
+                new CustomMenuItem { Id = "15", ParentId = "1", Type = IntegralUIMenuItemType.Separator },
+                new CustomMenuItem { Id = "16", ParentId = "1", Text = "Page Setup" },
+                new CustomMenuItem { Id = "17", ParentId = "1", Text = "Print" },
+                new CustomMenuItem { Id = "18", ParentId = "1", Type = IntegralUIMenuItemType.Separator },
+                new CustomMenuItem { Id = "19", ParentId = "1", Text = "Exit" }
+            }
+        },
+        new CustomMenuItem
+        {
+            Id = "2",
+            Text = "Edit",
+            Items = new()
+            {
+                new CustomMenuItem { Id = "21", ParentId = "2", Text = "Undo" },
+                new CustomMenuItem { Id = "22", ParentId = "2", Text = "Redo" },
+                new CustomMenuItem { Id = "23", ParentId = "2", Type = IntegralUIMenuItemType.Separator },
+                new CustomMenuItem { Id = "24", ParentId = "2", Text = "Cut" },
+                new CustomMenuItem { Id = "25", ParentId = "2", Text = "Copy" },
+                new CustomMenuItem { Id = "26", ParentId = "2", Text = "Paste" },
+                new CustomMenuItem { Id = "27", ParentId = "2", Text = "Delete" }
+            }
+        },
+        new CustomMenuItem
+        {
+            Id = "3",
+            Text = "View",
+            Items = new()
+            {
+                new CustomMenuItem { Id = "31", ParentId = "3", Text = "Auto Preview" },
+                new CustomMenuItem { Id = "32", ParentId = "3", Text = "Zoom", ZoomValue = 250 },
+                new CustomMenuItem { Id = "33",  ParentId = "3", Type = IntegralUIMenuItemType.Separator },
+                new CustomMenuItem
+                {
+                    Id = "34",
+                    ParentId = "3",
+                    Text = "Navigation Pane",
+                    Items = new()
+                    {
+                        new CustomMenuItem { Id = "341", ParentId = "34", Text = "Normal", AllowRadio = true, Checked = true },
+                        new CustomMenuItem { Id = "342", ParentId = "34", Text = "Minimized", AllowRadio = true },
+                        new CustomMenuItem { Id = "343", ParentId = "34", Text = "Off", AllowRadio = true },
+                        new CustomMenuItem { Id = "344", ParentId = "34", Type = IntegralUIMenuItemType.Separator },
+                        new CustomMenuItem { Id = "345", ParentId = "34", Text = "Current View Pane", AllowCheck = true },
+                        new CustomMenuItem { Id = "346", ParentId = "34", Text = "Favorite Folders", AllowCheck = true, Checked = true }
+                    }
+                },
+                new CustomMenuItem
+                {
+                    Id = "35",
+                    ParentId = "3",
+                    Text = "To-Do Bar",
+                    Items = new()
+                    {
+                        new CustomMenuItem { Id = "351", ParentId = "35", Text = "Normal", AllowRadio = true },
+                        new CustomMenuItem { Id = "352", ParentId = "35", Text = "Minimized", AllowRadio = true },
+                        new CustomMenuItem { Id = "353", ParentId = "35", Text = "Off", AllowRadio = true, Checked = true },
+                        new CustomMenuItem { Id = "354", ParentId = "35", Type = IntegralUIMenuItemType.Separator },
+                        new CustomMenuItem { Id = "355", ParentId = "35", Text = "Date Navigator", AllowCheck = true, Checked = true, Enabled = false },
+                        new CustomMenuItem { Id = "356", ParentId = "35", Text = "Appointments", AllowCheck = true, Checked = true, Enabled = false },
+                        new CustomMenuItem { Id = "357", ParentId = "35", Text = "Task List", AllowCheck = true, Checked = true, Enabled = false }
+                    }
+                },
+                new CustomMenuItem
+                {
+                    Id = "36",
+                    ParentId = "3",
+                    Text = "Reading Pane",
+                    Items = new()
+                    {
+                        new CustomMenuItem { Id = "361", ParentId = "36", Text = "Right", AllowRadio = true },
+                        new CustomMenuItem { Id = "362", ParentId = "36", Text = "Bottom", AllowRadio = true, Checked = true },
+                        new CustomMenuItem { Id = "363", ParentId = "36", Text = "Off", AllowRadio = true },
+                        new CustomMenuItem { Id = "364", ParentId = "36", Type = IntegralUIMenuItemType.Separator },
+                        new CustomMenuItem { Id = "365", ParentId = "36", Text = "Refresh" }
+                    }
+                },
+                new CustomMenuItem { Id = "37", ParentId = "3", Type = IntegralUIMenuItemType.Separator },
+                new CustomMenuItem { Id = "38",  ParentId = "3", Text = "Refresh" }
+           }
+        },
+        new CustomMenuItem
+        {
+            Id = "4",
+            Text = "Help",
+            Items = new()
+            {
+                new CustomMenuItem { Id = "41", ParentId = "4", Text = "Search" },
+                new CustomMenuItem { Id = "42", ParentId = "4", Text = "Documents" },
+                new CustomMenuItem { Id = "43", ParentId = "4", Type = IntegralUIMenuItemType.Separator },
+                new CustomMenuItem { Id = "44", ParentId = "4", Text = "About" }
+            }
+        }
+    };
+
+    // Events ----------------------------------------------------------------------------------------------------------------
+
+    private void menuClick(CustomMenuItem item)
+    {
+        if (item?.ParentId is not null)
+            Console.WriteLine($"Menu item: " + item?.Text + " is clicked.");
+    }
+
+    private void changeMenuFunc(string[] list, bool value)
+    {
+        foreach (string id in list)
+        {
+            CustomMenuItem? item = menuRef?.FindItemById(id);
+            if (item is not null)
+            {
+                Console.WriteLine($"item: {item.Text}");
+                item.Enabled = value;
+            }
+            else
+                Console.WriteLine($"item: NULL");
+        };
+
+        menuRef?.Refresh();
+    }
+
+    private void menuChecked(IntegralUIItemCheckEventArgs<CustomMenuItem> e)
+    {
+        switch (e.Item.ParentId)
+        {
+            // Navigation Pane
+            case "34":
+                // Enabled when Normal or Minimized
+                if (e.Item.Id == "341" || e.Item.Id == "342")
+                    changeMenuFunc(["345", "346"], true);
+                // Disable when Off
+                else if (e.Item.Id == "343")
+                    changeMenuFunc(["345", "346"], !e.Item.Checked);
+                else
+                    showCheckedMessage(e);
+                break;
+
+            // To-Do Bar
+            case "35":
+                // Enabled when Normal or Minimized
+                if (e.Item.Id == "351" || e.Item.Id == "352")
+                    changeMenuFunc(["355", "356", "357"], true);
+                // Disable when Off
+                else if (e.Item.Id == "353")
+                    changeMenuFunc(["355", "356", "357"], !e.Item.Checked);
+                else
+                    showCheckedMessage(e);
+                break;
+        }
+    }
+
+    private void showCheckedMessage(IntegralUIItemCheckEventArgs<CustomMenuItem> e)
+    {
+        Console.WriteLine($"{e.Item?.Text} is now {e.Checked}");
+    }
+
+    // Template --------------------------------------------------------------------------------------------------------------
+
+    private void preventClosing(MouseEventArgs e)
+    {
+        clearZoomInterval();
+    }
+
+    private void zoomIn(MouseEventArgs e, CustomMenuItem? item)
+    {
+        clearZoomInterval();
+
+        if (item is not null && item.ZoomValue < 500)
+        {
+            zoomInterval = new Timer((_) =>
+            {
+                item.ZoomValue = Math.Min(500, item.ZoomValue + 10);
+                StateHasChanged();
+
+                currentZoomValue = item.ZoomValue;
+            }, null, 0, 50);
+        }
+    }
+
+    private void zoomOut(MouseEventArgs e, CustomMenuItem? item)
+    {
+        clearZoomInterval();
+
+        if (item is not null && item.ZoomValue > 25)
+        {
+            zoomInterval = new Timer((_) =>
+            {
+                item.ZoomValue = Math.Max(25, item.ZoomValue - 10);
+                StateHasChanged();
+
+                currentZoomValue = item.ZoomValue;
+            }, null, 0, 50);
+        }
+    }
+
+    // Styling ---------------------------------------------------------------------------------------------------------------
+
+    private string getContentStyle()
+    {
+        string style = "";
+
+        style += $"transform: scale({currentZoomValue / 100});";
+
+        return style;
+    }
+
+}

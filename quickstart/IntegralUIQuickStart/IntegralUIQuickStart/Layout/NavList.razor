@@ -1,0 +1,211 @@
+﻿@inject NavigationManager NavigationManager
+
+<IntegralUITreeList Id="nav-tree" Items="tree" TItem="TreeListItem" Title="Components" ItemClick="@listItemClicked"></IntegralUITreeList>
+
+@code {
+
+    private List<TreeListItem> tree = new()
+    {
+        new TreeListItem { Text = "Button", Link = "/button/overview" },
+        new TreeListItem { Text = "ButtonGroup", Link = "/buttongroup/overview" },
+        new TreeListItem { Text = "Calendar", Link = "/calendar/overview" },
+        new TreeListItem { Text = "Card", Link = "/card/overview" },
+        new TreeListItem { Text = "CheckBox", Link = "/checkbox/overview" },
+        new TreeListItem { Text = "ContextMenu", Link = "/contextmenu/overview" },
+        new TreeListItem { Text = "DatePicker", Link = "/datepicker/overview" },
+        new TreeListItem 
+        { 
+            Id = "grd",
+            Text = "Grid",
+            Items = new()
+            {
+                new TreeListItem { Id = "grd-ovw", ParentId = "grd", Text = "Overview", Link = "/grid/overview" },
+                new TreeListItem
+                {
+                    Id = "grd-editing",
+                    ParentId = "grd",
+                    Text = "Editing",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "grd-editform", ParentId = "grd-editing", Text = "Form Editing", Link = "/grid/editing/form" }
+                    }
+                },
+                new TreeListItem
+                {
+                    Id = "grd-filtering",
+                    ParentId = "grd",
+                    Text = "Filtering",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "grd-fltovw", ParentId = "grd-filtering", Text = "Filtering Overview", Link = "/grid/filtering/overview" }
+                    }
+                },
+                new TreeListItem
+                {
+                    Id = "grd-grouping",
+                    ParentId = "grd",
+                    Text = "Grouping",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "grd-grpovw", ParentId = "grd-grouping", Text = "Grouping Overview", Link = "/grid/grouping/overview" }
+                    }
+                },
+                new TreeListItem
+                {
+                    Id = "grd-layout",
+                    ParentId = "grd",
+                    Text = "Layout",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "grd-mlhdr", ParentId = "grd-layout", Text = "Multi-line Headers", Link = "/grid/layout/multiline-headers" }
+                    }
+                },
+                new TreeListItem
+                {
+                    Id = "grd-pagination",
+                    ParentId = "grd",
+                    Text = "Pagination",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "grd-pgnovw", ParentId = "grd-pagination", Text = "Pagination Overview", Link = "/grid/pagination/overview" }
+                    }
+                },
+                new TreeListItem
+                {
+                    Id = "grd-sorting",
+                    ParentId = "grd",
+                    Text = "Sorting",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "grd-srtovw", ParentId = "grd-sorting", Text = "Sorting Overview", Link = "/grid/sorting/overview" }
+                    }
+                },
+                new TreeListItem
+                {
+                    Id = "grd-styling",
+                    ParentId = "grd",
+                    Text = "Styling",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "grd-styovw", ParentId = "grd-styling", Text = "Styling Overview", Link = "/grid/styling/overview" }
+                    }
+                }
+            }
+        },
+        new TreeListItem { Text = "List", Link = "/list/overview" },
+        new TreeListItem { Text = "Menu", Link = "/menu/overview" },
+        new TreeListItem
+        {
+            Id = "lstbx",
+            Text = "ListBox",
+            Items = new()
+            {
+                new TreeListItem { Id = "lstbx-ovw", ParentId = "lstbx", Text = "Overview", Link = "/listbox/overview" },
+                new TreeListItem
+                {
+                    Id = "lstbx-dd",
+                    ParentId = "lstbx",
+                    Text = "Drag and Drop",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "lstbx-ddovw", ParentId = "lstbx-dd", Text = "Drag Drop Overview", Link = "/listbox/dragdrop/overview" },
+                        new TreeListItem { Id = "lstbx-ddevn", ParentId = "lstbx-dd", Text = "Drag Drop Events", Link = "/listbox/dragdrop/events" },
+                        new TreeListItem { Id = "lstbx-ddlb", ParentId = "lstbx-dd", Text = "Drag Drop between ListBoxes", Link = "/listbox/dragdrop/between-listboxes" }
+                   }
+                },
+                new TreeListItem
+                {
+                    Id = "lstbx-lyt",
+                    ParentId = "lstbx",
+                    Text = "Layout",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "lstbx-lyttmp", ParentId = "lstbx-lyt", Text = "Templates", Link = "/listbox/layout/templates" }
+                   }
+                }
+            }
+        },
+        new TreeListItem { Text = "ListView", Link = "/listview/overview" },
+        new TreeListItem { Text = "Pager", Link = "/pager/overview" },
+        new TreeListItem { Text = "Panel", Link = "/panel/overview" },
+        new TreeListItem { Text = "PopOver", Link = "/popover/overview" },
+        new TreeListItem { Text = "ProgressBar", Link = "/progressbar/overview" },
+        new TreeListItem { Text = "RadioButton", Link = "/radiobutton/overview" },
+        new TreeListItem { Text = "Rating", Link = "/rating/overview" },
+        new TreeListItem { Text = "Select", Link = "/select/overview" },
+        new TreeListItem { Text = "Slider", Link = "/slider/overview" },
+        new TreeListItem { Text = "Tooltip", Link = "/tooltip/overview" },
+        new TreeListItem { Text = "TreeList", Link = "/treelist/overview" },
+        new TreeListItem
+        {
+            Id = "trw",
+            Text = "TreeView",
+            Items = new()
+            {
+                new TreeListItem { Id = "trw-ovw", ParentId = "trw", Text = "Overview", Link = "/treeview/overview" },
+                new TreeListItem
+                {
+                    Id = "trw-data",
+                    ParentId = "trw",
+                    Text = "Data",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "trw-lddmd", ParentId = "trw-data", Text = "Load on Demand", Link = "/treeview/data/load-on-demand" }
+                   }
+                },
+                new TreeListItem
+                {
+                    Id = "trw-dd",
+                    ParentId = "trw",
+                    Text = "Drag and Drop",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "trw-ddovw", ParentId = "trw-dd", Text = "Drag Drop Overview", Link = "/treeview/dragdrop/overview" },
+                        new TreeListItem { Id = "trw-ddevn", ParentId = "trw-dd", Text = "Drag Drop Events", Link = "/treeview/dragdrop/events" },
+                        new TreeListItem { Id = "trw-ddtrw", ParentId = "trw-dd", Text = "Drag Drop between TreeViews", Link = "/treeview/dragdrop/between-treeviews" }
+                   }
+                },
+                new TreeListItem
+                {
+                    Id = "trw-lyt",
+                    ParentId = "trw",
+                    Text = "Layout",
+                    Type = IntegralUIItemType.Group,
+                    Items = new()
+                    {
+                        new TreeListItem { Id = "trw-lyttmp", ParentId = "trw-lyt", Text = "Templates", Link = "/treeview/layout/templates" }
+                   }
+                }
+            }
+        }
+   };
+
+    private class TreeListItem
+    {
+        public bool Expanded { get; set; } = true;
+        public string? Id { get; set; } = string.Empty;
+        public List<TreeListItem> Items { get; set; } = [];
+        public string? Link { get; set; }
+        public string? ParentId { get; set; } = string.Empty;
+        public string? Text { get; set; }
+        public IntegralUIItemType Type { get; set; } = IntegralUIItemType.Item;
+        public bool Selected { get; set; } = false;
+    }
+
+    private void listItemClicked(IntegralUITreeListClickEventArgs<TreeListItem> e)
+    {
+        if (!string.IsNullOrEmpty(e.Item?.Link))
+            NavigationManager.NavigateTo(e.Item.Link, false);
+    }
+}

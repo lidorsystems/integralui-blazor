@@ -1,0 +1,69 @@
+﻿@page "/radiobutton/overview"
+
+<link rel="stylesheet" href="css/radiobutton/RadioButtonOverview.css?version=24.3.0" />
+
+<h2>RadioButton / Overview</h2>
+<div class="sample-block">
+    <IntegralUIRadioGroup Id="radiogroup-1" SelectedIndex="@firstGroupIndex" CheckedChanged="@OnFirstRadioChecked">
+        <IntegralUIRadioButton>Radio 1</IntegralUIRadioButton>
+        <IntegralUIRadioButton>Radio 2</IntegralUIRadioButton>
+        <IntegralUIRadioButton>Radio 3</IntegralUIRadioButton>
+    </IntegralUIRadioGroup>
+    <IntegralUIRadioGroup Id="radiogroup-2" SelectedIndex="@secondGroupIndex" CheckedChanged="@OnSecondRadioChecked">
+        <IntegralUIRadioButton>Radio 4</IntegralUIRadioButton>
+        <IntegralUIRadioButton>Radio 5</IntegralUIRadioButton>
+        <IntegralUIRadioButton>Radio 6</IntegralUIRadioButton>
+    </IntegralUIRadioGroup>
+    <IntegralUIRadioGroup Id="radiogroup-3" SelectedIndex="@thirdGroupIndex" CheckedChanged="@OnThirdRadioChecked">
+        <IntegralUIRadioButton>Radio 7</IntegralUIRadioButton>
+        <IntegralUIRadioButton>Radio 8</IntegralUIRadioButton>
+        <IntegralUIRadioButton>Radio 9</IntegralUIRadioButton>
+    </IntegralUIRadioGroup>
+    <div class="feature-help">
+        <p><span class="initial-space"></span><strong><span class="code-name">IntegralUI</span> RadioButton</strong> is a Blazor Component that represents a radio button. It works in relation with <strong><span class="code-name">IntegralUI</span> RadioGroup</strong> for creating different groups of radio buttons. It is fully customizable via CSS.</p>
+        <p><span class="initial-space"></span>All animations and appearances of radio buttons are done through CSS. In addition you can add your own custom images for each button state: checked or unchecked.</p>
+        <p><span class="initial-space"></span>The following properties and events are supported:</p>
+        <ul class="feature-points">
+            <li><span class="code-name">AllowAnimation</span> - determines whether animations are allowed or not, default is true</li>
+            <li><span class="code-name">Checked</span> - Specifies whether RadioButton is checked or not: true or false</li>
+            <li><span class="code-name">ColorScheme</span> - specifies the current color scheme in use: Light or Dark, by default is set to Light</li>
+            <li><span class="code-name">Enabled</span> - determines whether the PopOver is enabled or disabled</li>
+            <li><span class="code-name">Name</span> - Uniquely identifies the component</li>
+            <li><span class="code-name">Theme</span> - specifies the current Theme in use, by default is set to Office</li>
+            <li class="feature-points-break"><br /></li>
+            <li><span class="code-name">CheckedChanged</span> - Occurs when Checked property changes</li>
+            <li><span class="code-name">EnabledChanged</span> - occurs when Enabled property value changes</li>
+        </ul>
+        <br />
+        <p><span class="initial-space"></span>RadioGroup has similar properties and events. In this example, whenever RadioButton is checked, the <span class="code-name">ButtonChecked</span> event is fired.</p>
+    </div>
+</div>
+
+@code {
+
+    private int firstGroupIndex = 0;
+    private int secondGroupIndex = 2;
+    private int thirdGroupIndex = 1;
+
+    private void OnFirstRadioChecked(IntegralUIButtonEventArgs e)
+    {
+        firstGroupIndex = e.Index;
+
+        Console.WriteLine($"RadioButton in first group at position: {e.Index} is checked");
+    }
+
+    private void OnSecondRadioChecked(IntegralUIButtonEventArgs e)
+    {
+        secondGroupIndex = e.Index;
+
+        Console.WriteLine($"RadioButton in second group at position: {e.Index} is checked");
+    }
+
+    private void OnThirdRadioChecked(IntegralUIButtonEventArgs e)
+    {
+        thirdGroupIndex = e.Index;
+
+        Console.WriteLine($"RadioButton in third group at position: {e.Index} is checked");
+    }
+
+}

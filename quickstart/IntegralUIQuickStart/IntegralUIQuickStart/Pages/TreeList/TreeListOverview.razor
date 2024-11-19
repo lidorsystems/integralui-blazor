@@ -1,0 +1,148 @@
+﻿@page "/treelist/overview"
+
+@using IntegralUI.Events
+
+<h2>TreeList / Overview</h2>
+<div class="sample-block">
+    <IntegralUITreeList TItem="CustomItem"
+        Items="@items"
+        Size="@ctrlSize"
+        Title="Categories"
+        ItemClick="@treeItemClicked"
+    ></IntegralUITreeList>
+    <div class="feature-help">
+        <p><span class="initial-space"></span><strong><span class="code-name">IntegralUI</span> TreeList</strong> is a Blazor Component that displays one list of items from a tree hierarchy. By changing the currently selected item, the TreeList will display only the child items that belong to the selIn following sections of this article, you will find information about general features that are included in the TreeList component.</p>
+        <p><span class="initial-space"></span>In above demo there are different categories. By selecting a category, currently displayed list will slide to the left and a new list will show with sub-categories. The category name will appear in component header, from where you can move back to the previous selection.</p>
+    </div>
+</div>
+
+@code {
+
+    public IntegralUISize ctrlSize = new IntegralUISize { Width = 300, Height = 400 };
+    public List<CustomItem> items = new()
+    {
+        new CustomItem
+        {
+            Id = "1",
+            Text = "Books",
+            Items = new()
+            {
+                new CustomItem { Id = "11", ParentId = "1", Text = "Art" },
+                new CustomItem
+                {
+                    Id = "12",
+                    ParentId = "1",
+                    Text = "Business",
+                    Items = new()
+                    {
+                        new CustomItem { Id = "121", ParentId = "12", Text = "Economics" },
+                        new CustomItem
+                        {
+                            Id = "122",
+                            ParentId = "12",
+                            Text = "Investing",
+                            Items = new()
+                            {
+                                new CustomItem { Id = "1221", ParentId = "122", Text = "Bonds" },
+                                new CustomItem { Id = "1222", ParentId = "122", Text = "Options" },
+                                new CustomItem { Id = "1223", ParentId = "122", Text = "Stocks" }
+                            }
+                        },
+                        new CustomItem { Id = "123", ParentId = "12", Text = "Management" },
+                        new CustomItem { Id = "124", ParentId = "12", Text = "Small Business" }
+                    }
+                },
+                new CustomItem { Id = "13", ParentId = "1", Text = "Health" },
+                new CustomItem { Id = "14", ParentId = "1", Text = "Literature" },
+                new CustomItem
+                {
+                    Id = "15",
+                    ParentId = "1",
+                    Text = "Science",
+                    Items = new()
+                    {
+                        new CustomItem { Id = "151", ParentId = "12", Text = "Astronomy" },
+                        new CustomItem { Id = "152", ParentId = "12", Text = "Mathematics" },
+                        new CustomItem { Id = "153", ParentId = "12", Text = "Evolution" },
+                        new CustomItem { Id = "154", ParentId = "12", Text = "Nature" }
+                    }
+                }
+            }
+        },
+        new CustomItem { Id = "2", Text = "Computers" },
+        new CustomItem
+        {
+            Id = "3",
+            Text = "Electronics",
+            Items = new()
+            {
+                new CustomItem { Id = "31", ParentId = "3", Text = "Camera" },
+                new CustomItem { Id = "32", ParentId = "3", Text = "Cell Phones" },
+                new CustomItem { Id = "33", ParentId = "3", Text = "Video Game Consoles" }
+            }
+        },
+        new CustomItem
+        {
+            Id = "4",
+            Text = "Music",
+            Items = new()
+            {
+                new CustomItem { Id = "41", ParentId = "4", Text = "Blues" },
+                new CustomItem { Id = "42", ParentId = "4", Text = "Classic Rock" },
+                new CustomItem { Id = "43", ParentId = "4", Text = "Pop" },
+                new CustomItem { Id = "44", ParentId = "4", Text = "Jazz" }
+            }
+        },
+        new CustomItem
+        {
+            Id = "5",
+            Text = "Software",
+            Items = new()
+            {
+                new CustomItem { Id = "51", ParentId = "5", Text = "Games" },
+                new CustomItem { Id = "52", ParentId = "5", Text = "Operating Systems" },
+                new CustomItem { Id = "53", ParentId = "5", Text = "Network & Servers" },
+                new CustomItem { Id = "54", ParentId = "5", Text = "Security" }
+            }
+        },
+        new CustomItem
+        {
+            Id = "6",
+            Text = "Sports",
+            Items = new()
+            {
+                new CustomItem { Id = "61", ParentId = "6", Text = "Baseball" },
+                new CustomItem { Id = "62", ParentId = "6", Text = "Martial Arts" },
+                new CustomItem { Id = "63", ParentId = "6", Text = "Running" },
+                new CustomItem
+                {
+                    Id = "64",
+                    ParentId = "6",
+                    Text = "Tennis",
+                    Items = new()
+                    {
+                        new CustomItem { Id = "641", ParentId = "64", Text = "Accessories" },
+                        new CustomItem { Id = "642", ParentId = "64", Text = "Balls" },
+                        new CustomItem { Id = "643", ParentId = "64", Text = "Racquets" }
+                    }
+                }
+            }
+        },
+        new CustomItem { Id = "7", Text = "Video Games" },
+        new CustomItem { Id = "8", Text = "Watches" }
+    };
+
+    public class CustomItem
+    {
+        public string? Id { get; set; } = string.Empty;
+        public List<CustomItem> Items { get; set; } = [];
+        public string? ParentId { get; set; } = string.Empty;
+        public string? Text { get; set; }
+        public bool Selected { get; set; } = false;
+    }
+
+    private void treeItemClicked(IntegralUITreeListClickEventArgs<CustomItem> e)
+    {
+        Console.WriteLine($"Item Clicked: {e.Item?.Text}");
+    }
+}

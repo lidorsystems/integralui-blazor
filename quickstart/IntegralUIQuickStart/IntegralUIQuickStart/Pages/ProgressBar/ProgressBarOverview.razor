@@ -1,0 +1,35 @@
+﻿@page "/progressbar/overview"
+
+<link rel="stylesheet" href="css/progressbar/ProgressBarOverview.css?version=24.3.0" />
+
+<h2>ProgressBar / Overview</h2>
+<div class="sample-block" id="progressbar-overview">
+    <IntegralUIProgressBar Id="progress-1" Size="@ctrlSize" Value="@progressValue1"></IntegralUIProgressBar>
+    <IntegralUIProgressBar Id="progress-2" LabelAlignment="IntegralUILabelAlignment.MiddleLeft" Size="@ctrlSize" Value="@progressValue2"></IntegralUIProgressBar>
+    <IntegralUIProgressBar Id="progress-3" LabelAlignment="IntegralUILabelAlignment.BottomCenter" Size="@ctrlSize" Value="@progressValue3"></IntegralUIProgressBar>
+    <div class="feature-help">
+        <p><span class="initial-space"></span><strong><span class="code-name">IntegralUI</span> ProgressBar</strong> is a Blazor Component that visualize the progression of an operation. You can customize the progress indicator using different color or image via CSS.</p>
+        <p><span class="initial-space"></span>You can also change orientation of the ProgressBar to: horizontal or vertical. The appearance of progresss value is based on different set of CSS styles, based on orientation.</p>
+        <p><span class="initial-space"></span>The following properties and events are supported:</p>
+        <ul class="feature-points">
+            <li><span class="code-name">AllowAnimation</span> - Determines whether component appearance is animated or not</li>
+            <li><span class="code-name">Data</span> - Specifies an object that holds data related to the component</li>
+            <li><span class="code-name">Enabled</span> - Determines whether the component is enabled or disabled</li>
+            <li><span class="code-name">Name</span> - Uniquely identifies the component</li>
+            <li><span class="code-name">Orientation</span> - Determines whether the progressbar appears horizontally or vertically</li>
+            <li><span class="code-name">State</span> - Specifies the component state: Normal or Selected.</li>
+            <li><span class="code-name">Value</span> - Holds the current progress value</li>
+            <li class="feature-points-break"><br /></li>
+            <li><span class="code-name">ValueChanged</span> - Occurs when Value property changes</li>
+        </ul>
+    </div>
+</div>
+
+@code {
+
+    public double progressValue1 = 50;
+    public double progressValue2 = 30;
+    public double progressValue3 = 70;
+
+    public IntegralUISize ctrlSize = new() { Width = 300 };
+}

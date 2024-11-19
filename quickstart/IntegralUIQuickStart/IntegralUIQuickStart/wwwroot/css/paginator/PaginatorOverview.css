@@ -1,0 +1,26 @@
+﻿.pgr-ovw-container {
+    position: relative;
+    width: 500px;
+}
+
+.pgr-ovw-page-container {
+    height: 302px;
+    margin-bottom: 7px;
+}
+
+.pgr-ovw-page-block {
+    background: white;
+    border: thin solid gray;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 500px;
+    height: 300px;
+}
+
+.pgr-ovw-page-block span {
+    display: block;
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 140px;
+}

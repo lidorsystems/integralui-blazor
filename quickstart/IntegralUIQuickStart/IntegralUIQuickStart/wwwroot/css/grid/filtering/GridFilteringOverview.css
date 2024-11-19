@@ -1,0 +1,8 @@
+﻿[id="grid-filtering-overview"] {
+    --iui-grid-column-footer-font-weight: bold;
+}
+
+[id="grid-filtering-shipmode-list"] {
+    --iui-list-border: thin solid transparent;
+    --iui-list-padding: 0;
+}
