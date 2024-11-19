@@ -71,7 +71,32 @@ IntegralUI for Blazor is built with .NET 8.0 framework.
 
 ## Installation
 
-Once you complete with installtion of the latest version, you can use all components available in IntegralUI library. There are few namespaces that you can import:
+```bash
+npm install https://github.com/lidorsystems/integralui-blazor.git
+```
+
+or directly from NPM
+
+```bash
+npm i integralui-blazor
+```
+
+Library files are located in /bin folder of product's installation directory.
+
+1. Copy/Paste the NuGet package from /bin folder to a referencing folder (the folder from where you are referencing external or vendor libraries) in your project. The /resources folder is optional.
+2. Install the NuGet package for IntegralUI library from a local folder.
+3. Open your project
+4. From Solution Explorer right-click on Dependencies option and select "Manage NuGet Packages..."
+5. In top-right corner click on Tools icon to create new package source
+6. Create a new package source by licking on + tool button
+7. Under Name field enter IntegralUI and under Source field click on browse button to select your referencing folder and click Update button and press OK
+8. The referencing folder should contain the NuGet package for IntegralUI library, the one copied from /bin folder (see first line above)
+9. In NuGet package manager select the IntegralUI package source from the dropdown list (from top-right corner)
+10. Select the Browse tab to see all available IntegraUI versions
+11. Install the latest version
+12. Close the NuGet package manager
+
+Now you can use all components available in IntegralUI library. There are few namespaces that you can import:
 
 IntegralUI.Components
 IntegralUI.Data
