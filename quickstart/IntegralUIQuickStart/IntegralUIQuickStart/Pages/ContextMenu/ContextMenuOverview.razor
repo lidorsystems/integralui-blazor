@@ -1,0 +1,108 @@
+﻿@page "/contextmenu/overview"
+
+<link rel="stylesheet" href="css/contextmenu/ContextMenuOverview.css?version=24.3.0" />
+
+<h2>ContextMenu / Overview</h2>
+<div class="sample-block">
+    <IntegralUIContextMenu Id="contextmenu-overview" TItem="CustomMenuItem"
+        AutoClose="false"
+        Items="@items"
+        CheckedChanged="@menuChecked"
+        MenuClick="@menuClick"
+    >
+        <ChildContent>
+            <div class="cmnu-ovw-block" style="@getBlockStyle()">
+                <span>Right click to open the context menu</span>
+            </div>
+        </ChildContent>
+    </IntegralUIContextMenu>
+    <div class="feature-help">
+        <p><span class="initial-space"></span><strong><span class="code-name">IntegralUI</span> ContextMenu</strong> is a Blazor Component that allows you to attach a custom context menu to any HTML element or Blazor component. Whenever element is right-clicked, a context menu will popup showing data provided on your side.</p>
+        <p><span class="initial-space"></span>In this example, whenever the block is right-clicked, a context menu will appear with options from where you can change the font style of the block content. These options are divided in two groups using a separator. Options in the first group have a checkbox, while in the second have a radio button. Depending on which option is active, the font style of the block content changes accordingly.</p>
+        <p><span class="initial-space"></span>In addition, ContextMenu has <strong>AutoClose</strong> property set to <strong>false</strong>, which means it will not close when clicked outside. This allows you to change CheckBox or RadioButton state without closing. To exit the ContextMenu, either click on Exit menu option or click on menu item label.</p>
+    </div>
+</div>
+
+@code {
+    private class CustomMenuItem
+    {
+        public bool AllowCheck { get; set; } = false;
+        public bool AllowRadio { get; set; } = false;
+        public bool Checked { get; set; } = false;
+        public string? Id { get; set; }
+        public string? Text { get; set; }
+        public IntegralUIMenuItemType Type { get; set; } = IntegralUIMenuItemType.Item;
+    }
+
+    private List<CustomMenuItem> items = new()
+        {
+            new CustomMenuItem { Id = "1", Text = "Context Menu", Type = IntegralUIMenuItemType.Header },
+            new CustomMenuItem { Id = "2", Text = "Bold", AllowCheck = true, Checked = true },
+            new CustomMenuItem { Id = "3", Text = "Italic", AllowCheck = true },
+            new CustomMenuItem { Id = "4", Text = "Strikethrough", AllowCheck = true },
+            new CustomMenuItem { Id = "5", Type = IntegralUIMenuItemType.Separator },
+            new CustomMenuItem { Id = "6", Text = "x1", AllowRadio = true, Checked = true },
+            new CustomMenuItem { Id = "7", Text = "x1.5", AllowRadio = true },
+            new CustomMenuItem { Id = "8", Text = "x2", AllowRadio = true },
+            new CustomMenuItem { Id = "9", Type = IntegralUIMenuItemType.Separator },
+            new CustomMenuItem { Id = "10", Text = "Exit" }
+      };
+
+    private string fontWeight = "bold";
+    private string fontStyle = "normal";
+    private string fontSize = "1";
+    private string textDecoration = "none";
+
+    private string getBlockStyle()
+    {
+        string style = "";
+
+        style += $"font-weight: {fontWeight};";
+        style += $"font-style: {fontStyle};";
+        style += $"font-size: {fontSize}rem;";
+        style += $"text-decoration: {textDecoration};";
+
+        return style;
+    }
+
+    private void menuChecked(IntegralUIItemCheckEventArgs<CustomMenuItem> e)
+    {
+        updateBlockStyle(e.Item?.Id, e.Checked);
+    }
+
+    private void menuClick(CustomMenuItem item)
+    {
+        updateBlockStyle(item.Id, item.Checked);
+    }
+
+    private void updateBlockStyle(string? itemId, bool isChecked)
+    {
+        switch (itemId)
+        {
+            case "2":
+                fontWeight = isChecked ? "bold" : "normal";
+                break;
+
+            case "3":
+                fontStyle = isChecked ? "italic" : "normal";
+                break;
+
+            case "4":
+                textDecoration = isChecked ? "line-through" : "none";
+                break;
+
+            case "6":
+                fontSize = isChecked ? "1" : "1";
+                break;
+
+            case "7":
+                fontSize = isChecked ? "1.5" : "1";
+                break;
+
+            case "8":
+                fontSize = isChecked ? "2" : "1";
+                break;
+        }
+    }
+
+}

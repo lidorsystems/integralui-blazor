@@ -1,0 +1,312 @@
+﻿@page "/grid/filtering/overview"
+@inject HttpClient Http
+
+<link rel="stylesheet" href="css/grid/filtering/GridFilteringOverview.css?version=24.3.0" />
+
+<h2>Grid / Filtering Overview</h2>
+<div class="sample-block">
+    <IntegralUIGrid @ref=gridRef Id="grid-filtering-overview" TModel="CustomData"
+                    AllowAnimation="false"
+                    AllowFilter="true"
+                    DataColumns="@gridColumns"
+                    DataSource="@gridRows"
+                    ShowFooter="false"
+                    Size="@gridSize"
+                    ColumnClick="@gridColumnClick">
+        <Columns>
+            @foreach (IntegralUIDataColumn column in gridColumns)
+            {
+                @if (column.Field == "ShipMode")
+                {
+                    <IntegralUIGridColumn Data="@column">
+                        <FilterTemplate>
+                            <IntegralUIList Id="grid-filtering-shipmode-list" TItem="ShipModeObject"
+                                            CheckBoxes="true"
+                                            Items="@shipModeOptions"
+                                            MaxVisibleItems="4">
+                                <ItemTemplate Context="option">
+                                    <span>@option.Item?.Value</span>
+                                </ItemTemplate>
+                            </IntegralUIList>
+                        </FilterTemplate>
+                    </IntegralUIGridColumn>
+                }
+                else
+                {
+                    <IntegralUIGridColumn Data="@column"></IntegralUIGridColumn>
+                }
+            }
+        </Columns>
+        <Styles>
+            <IntegralUIStyle TargetType="IntegralUITargetType.Row" ConditionIndex="@evenOddStyle" Background="#f9f9f9"></IntegralUIStyle>
+        </Styles>
+    </IntegralUIGrid>
+    <div class="feature-help">
+        <p><span class="initial-space"></span>This sample shows how to filter the Grid data using <strong>Filter Chain</strong> with multiple different conditions. Each column can have a filter type specified: Date, Numeric, String or Custom. With custom filtering you can provode your own UI content and functionality using <strong>FilterTemplate</strong> and custom logic set in your own <strong>Filter</strong> function.</p>
+        <p><span class="initial-space"></span>By clicking on the filter panel (above the grid header), a pop-up window will appear listing all columns that have filtering enabled. In this example, there are multiple columns with different filtering options. Depending on the <span class="code-name">FilterType</span> property value, a different set of filtering conditions becomes avalable.</p>
+        <p><span class="initial-space"></span>Once filter condition is set, comparison operator and matching value, clicking on <strong>Apply</strong> button will filter the Grid data. To change the matching value, click on filter label. The filter label will change stating the column name, comparison operator and matching value. You can add multiple filters in a chain, which are processed from left to right. To remove a filter click on delete button (x) after the filter label.</p>
+        <p><span class="initial-space"></span>For filtering operations, internally the <strong>IntegralUIFilterService</strong> is in use, which provides many ways to filter data based on date, numeric or string values using multiple conditions with AND / OR combinations.</p>
+        <p><span class="initial-space"></span>In addition, you can sort the Grid data by clicking on column header. Sorting for 'ShipMode' column is disabled.</p>
+    </div>
+</div>
+
+@code {
+
+
+    //
+    // Data
+    //
+
+    // Data Model
+    private class CustomData
+    {
+        public string? Customer { get; set; }
+        public string? OrderDate { get; set; }
+        public string? OrderID { get; set; }
+        public double Price { get; set; }
+        public string? ProductName { get; set; }
+        public int Quantity { get; set; }
+        public string? ShipDate { get; set; }
+        public DeliveryOption ShipMode { get; set; } = DeliveryOption.None;
+        public double ShippingCost { get; set; }
+        public double Total { get; set; }
+
+        // State Properties
+        public bool Selected { get; set; } = false;
+    }
+
+    public enum DeliveryOption
+    {
+        None,
+        DeliveryTruck,
+        RegularAir,
+        ExpressAir
+    }
+
+    private List<IntegralUIDataColumn> gridColumns = [];
+    private List<CustomData>? gridRows = [];
+    public IntegralUISize gridSize = new() { Height = 500 };
+
+    //
+    // Filtering - Custom for ShipMode Column
+    //
+
+    private IntegralUIFilterParameters shipModeFilterParams = new();
+    private IntegralUISize shipModeListSize = new() { Width = 350 };
+
+    public class ShipModeObject
+    {
+        public bool Checked { get; set; } = false;
+        public DeliveryOption Value { get; set; } = DeliveryOption.None;
+    }
+
+    public List<ShipModeObject> shipModeOptions = new()
+    {
+        new ShipModeObject() { Value = DeliveryOption.None },
+        new ShipModeObject() { Value = DeliveryOption.DeliveryTruck },
+        new ShipModeObject() { Value = DeliveryOption.RegularAir },
+        new ShipModeObject() { Value = DeliveryOption.ExpressAir }
+    };
+
+    //
+    // References
+    //
+
+    private IntegralUIGrid<CustomData>? gridRef;
+
+    //
+    // Sorting
+    //
+
+    private IntegralUIDataColumn? prevSortColumn;
+    private IntegralUISortOrder sorting = IntegralUISortOrder.None;
+
+    //
+    // Initialization ---------------------------------------------------------------------------------------------------------
+    //
+
+    public GridFilteringOverview()
+    {
+        // Custom Filter method for ShipMode column
+        shipModeFilterParams.Filter = filterByShipMode;
+
+        // Columns
+        gridColumns = new()
+        {
+            new IntegralUIDataColumn()
+            {
+                Field = "OrderID",
+                HeaderText = "Order ID",
+                Width = 120
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                Field = "Customer",
+                Width = 300
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                Field = "ProductName",
+                HeaderText = "Product Name",
+                Width = 200
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Center,
+                Field = "OrderDate",
+                FilterType = IntegralUIFilterType.Date,
+                FormatSpecifier = "dd MMM yyyy",
+                HeaderText = "Order Date",
+                Width = 180
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                AllowSort = false,
+                ContentAlignment = IntegralUIHorizontalAlignment.Center,
+                Field = "ShipMode",
+                FilterParameters = shipModeFilterParams,
+                FilterType = IntegralUIFilterType.Custom,
+                HeaderText = "Ship Mode",
+                Width = 240
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Right,
+                Field = "Quantity",
+                FilterType = IntegralUIFilterType.Numeric,
+                FormatSpecifier = "N0",
+                FooterAlignment = IntegralUIHorizontalAlignment.Right,
+                Width = 150
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Right,
+                Field = "Price",
+                FilterType = IntegralUIFilterType.Numeric,
+                FormatSpecifier = "C2",
+                Width = 200
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Right,
+                Field = "Total",
+                FilterType = IntegralUIFilterType.Numeric,
+                FormatSpecifier = "C2",
+                FooterAlignment = IntegralUIHorizontalAlignment.Right,
+                Width = 240
+            }
+        };
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Get the data from the grid-orders.json file
+        List<CustomData>? data = await Http.GetFromJsonAsync<List<CustomData>>("data/grid-orders.json");
+        if (data is not null)
+        {
+            gridRows = data;
+            StateHasChanged();
+
+            // Update Total value for each row based on Quantity and Price
+            foreach (CustomData obj in gridRows)
+                obj.Total = obj.Quantity * obj.Price;
+
+            if (gridRef is not null)
+            {
+                // Update the Grid layout with new data
+                await gridRef.UpdateLayoutAsync();
+
+                // Initially apply Sorting by OrderDate in Ascending order
+                IntegralUIDataColumn? column = gridRef.GetColumnByField("OrderDate");
+                if (column is not null)
+                {
+                    column.Selected = true;
+                    column.Sorting = IntegralUISortOrder.Ascending;
+                    prevSortColumn = column;
+
+                    await gridRef.Sort(column, column.Sorting ?? IntegralUISortOrder.Ascending);
+                }
+            }
+        }
+    }
+
+    //
+    // Custom Filter --------------------------------------------------------------------------------------------------------
+    //
+
+    private bool filterByShipMode(object? value, object? obj)
+    {
+        bool retValue = false;
+
+        if (value is not null && value.GetType() == typeof(DeliveryOption))
+        {
+            DeliveryOption shipMode = (DeliveryOption)value;
+
+            foreach (ShipModeObject option in shipModeOptions)
+            {
+                if (option.Checked && option.Value == shipMode)
+                {
+                    retValue = true;
+                    break;
+                }
+            }
+        }
+
+        return retValue;
+    }
+
+    //
+    // Sorting ---------------------------------------------------------------------------------------------------------------
+    //
+
+    private void gridColumnClick(IntegralUIDataColumn column)
+    {
+        if (column is not null && column.AllowSort)
+        {
+            // Only change the order if same column is clicked
+            if (prevSortColumn is not null && !EqualityComparer<IntegralUIDataColumn>.Default.Equals(column, prevSortColumn))
+            {
+                prevSortColumn.Selected = false;
+                column.Sorting = prevSortColumn.Sorting;
+            }
+            else
+            {
+                switch (column.Sorting)
+                {
+                    case IntegralUISortOrder.Ascending:
+                        column.Sorting = IntegralUISortOrder.Descending;
+                        break;
+
+                    case IntegralUISortOrder.Descending:
+                        column.Sorting = IntegralUISortOrder.None;
+                        break;
+
+                    default:
+                        column.Sorting = IntegralUISortOrder.Ascending;
+                        break;
+                }
+            }
+
+            prevSortColumn = column;
+
+            gridRef?.Sort(column, column.Sorting ?? IntegralUISortOrder.Ascending);
+        }
+    }
+
+    //
+    // Styling ---------------------------------------------------------------------------------------------------------------
+    //
+
+    private bool evenOddStyle(object? obj, int index)
+    {
+        return index % 2 == 1;
+    }
+}

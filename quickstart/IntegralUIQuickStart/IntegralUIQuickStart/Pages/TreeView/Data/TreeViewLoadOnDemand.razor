@@ -1,0 +1,102 @@
+﻿@page "/treeview/data/load-on-demand"
+
+<h2>TreeView / Load on Demand</h2>
+<div class="sample-block">
+    <IntegralUITreeView @ref=treeRef Id="treeview-load-on-demand" TItem="TreeItem"
+        Items="@items"
+        MouseWheelSpeed="IntegralUISpeedMode.VerySlow"
+        Size="@ctrlSize"
+        BeforeExpand="@treeBeforeExpand">
+    </IntegralUITreeView>
+    <div class="feature-help">
+        <p><span class="initial-space"></span>In above demo, when you click on expanding icon, a new random data is created and then inserted into the expanding item as its children. This process is accompanied with loading animation represented by custom loading icon that replaces the expanding icon for specified item. You can expand multiple items at once and new data will be added accordingly.</p>
+        <p><span class="initial-space"></span>You can load new data from a remote JSON file or a database into a specified item. Because this sample is offline, this functionality is not presented here.</p>
+        <p><span class="initial-space"></span>Once data is loaded for specifdic item, you can expand/collapse its content without further loading.</p>
+    </div>
+</div>
+
+@code {
+
+    private IntegralUISize ctrlSize = new() { Width = 350, Height = 300 };
+    private IntegralUITreeView<TreeItem>? treeRef;
+
+    public class TreeItem
+    {
+        public bool Expanded { get; set; } = false;
+        public bool HasChildren { get; set; } = true;
+        public string? Id { get; set; }
+        public List<TreeItem> Items { get; set; } = [];
+        public string? ParentId { get; set; }
+        public bool Selected { get; set; } = false;
+        public string? Text { get; set; }
+    }
+
+    private List<TreeItem> items = new()
+    {
+        new TreeItem { Text = "Item 1" },
+        new TreeItem { Text = "Item 2" },
+        new TreeItem { Text = "Item 3" }
+    };
+
+    // Events ---------------------------------------------------------------------------------------------------------------
+
+    // Handle the beforeExpand event to populate the expanding item with new data
+    private async Task treeBeforeExpand(IntegralUICancelEventArgs e)
+    {
+        if (e.Data is not null)
+        {
+            Type eventDataType = e.Data.GetType();
+            if (eventDataType == typeof(TreeItem))
+            {
+                TreeItem item = (TreeItem)e.Data;
+
+                if (item.Items.Count == 0)
+                {
+                    // Show the loading icon
+                    treeRef?.BeginLoad(item);
+
+                    await Task.Delay(1000);
+
+                    // Get random number of child items
+                    int count = getChildCount();
+                    for (int i = 1; i <= count; i++)
+                    {
+                        // Create a child item
+                        TreeItem childItem = new()
+                            {
+                                HasChildren = itemHasChildren(),
+                                Text = item.Text + i.ToString()
+                            };
+
+                        // Add the child item to the expanding item
+                        item.Items.Add(childItem);
+                    }
+
+                    // Restore the expanding icon
+                    treeRef?.EndLoad(item);
+
+                    // Update the appareance of the TreeView
+                    treeRef?.Refresh();
+                }
+            }
+        }
+    }
+
+    // Methods --------------------------------------------------------------------------------------------------------------
+
+    // Make sure each node has a random set of child items
+    private int getChildCount()
+    {
+        Random rnd = new Random();
+        return rnd.Next(1, 5);
+    }
+
+    // Make sure that some child items can have children
+    private bool itemHasChildren()
+    {
+        Random rnd = new Random();
+        int num = 2 + rnd.Next(1, 5);
+
+        return num % 2 == 0;
+    }
+}

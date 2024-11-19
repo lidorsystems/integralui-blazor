@@ -1,0 +1,280 @@
+﻿@page "/treeview/layout/templates"
+
+<link rel="stylesheet" href="css/treeview/layout/TreeViewTemplates.css?version=24.3.0" />
+
+<h2>TreeView / Templates</h2>
+<div class="sample-block">
+    <IntegralUITreeView @ref=treeRef Id="treeview-layout-templates" TItem="TreeItem"
+        Items="@items"
+        MouseWheelSpeed="IntegralUISpeedMode.VerySlow"
+        Size="@ctrlSize"
+        ToolbarVisibility="IntegralUIContentVisibility.Always">
+        <ItemTemplate>
+            <span class="@getIconClass(@context.Item)"></span>
+            <IntegralUITooltip Title="@context.Item?.Text">
+                <ChildContent>
+                    <span class="trw-lyttmp-label">@context.Item?.Text</span>
+                </ChildContent>
+            </IntegralUITooltip>
+        </ItemTemplate>
+        <ToolbarTemplate>
+            <div class="trw-lyttmp-status" align="center">
+                <span class="trw-lyttmp-status-label" style="@getStatusStyle(@context.Item)">@context.Item?.Status</span>
+                @if (isThereChildren(@context.Item))
+                {
+                    <IntegralUIProgressBar AllowAnimation="false" AllowFocus="false" ShowLabel="false" Size="@sliderSize" Value="@getItemValue(@context.Item)"></IntegralUIProgressBar>
+                }
+                else
+                {
+                    <IntegralUISlider AllowAnimation="false" AllowFocus="false" Size="@sliderSize" Value="@getItemValue(@context.Item)" ValueChanged="@((val) => @sliderValueChanged(val, @context.Item))"></IntegralUISlider>
+                }
+            </div>
+        </ToolbarTemplate>
+    </IntegralUITreeView>
+    <div class="feature-help">
+        <p><span class="initial-space"></span>In this demo, a <strong>Custom Template</strong> is created for items and the <strong>Toolbar</strong> on the right. The example simulates a project developmenet status, a tree strcuture where each project category contains multiple tasks and sub-tasks. You can update the status for each task using a <strong>Slider</strong>, which in turn updates the progress of all parent categories.</p>
+        <p><span class="initial-space"></span>The toolbar shows a progress bar visualizing the completion of specific task. Depending on item value, the progress is updated in different colors, where each color represents a progression stage: red, orange, green, blue and violet. For parent items, the progress value is calculated from its children, using an aggregation function.</p>
+        <p><span class="initial-space"></span>In addition, some items have their text trimmed and when moving the mouse cursor over them a <strong>Tooltip</strong> will appear showing the full text.</p>
+    </div>
+</div>
+@code {
+
+    private IntegralUISize ctrlSize = new() { Width = 600, Height = 500 };
+    public IntegralUISize sliderSize = new() { Width = 100, Height = 20 };
+    private IntegralUITreeView<TreeItem>? treeRef;
+
+    public class TreeItem
+    {
+        public bool Expanded { get; set; } = true;
+        public string? Id { get; set; }
+        public List<TreeItem> Items { get; set; } = [];
+        public string? ParentId { get; set; }
+        public bool Selected { get; set; } = false;
+        public TreeItemStatus Status { get; set; } = TreeItemStatus.Open;
+        public string? Text { get; set; }
+        public double Value { get; set; } = 0;
+    }
+
+    public enum TreeItemStatus
+    {
+        Complete,
+        InProgress,
+        Open,
+        ToDo
+    }
+
+    private List<TreeItem> items = new()
+    {
+        new TreeItem
+        {
+            Status = TreeItemStatus.InProgress,
+            Text = "Theme Park Construction",
+            Items = new()
+            {
+                new TreeItem
+                { 
+                    Status = TreeItemStatus.InProgress,
+                    Text = "Site Preparations",
+                    Items = new()
+                    {
+                        new TreeItem
+                        { 
+                            Text = "Location Map", 
+                            Status = TreeItemStatus.InProgress, 
+                            Expanded = false,
+                            Items = new()
+                            {
+                                new TreeItem { Text = "Relocate trees", Status = TreeItemStatus.Complete, Value = 100 },
+                                new TreeItem { Text = "Relocate Elves", Status = TreeItemStatus.InProgress, Value = 78 },
+                                new TreeItem { Text = "Bulldoze the hills", Status = TreeItemStatus.Open, Value = 40 },
+                                new TreeItem { Text = "Remove waste rock and soil", Status = TreeItemStatus.InProgress, Value = 90 },
+                                new TreeItem { Text = "Build access road", Status = TreeItemStatus.Open, Value = 28 }
+                            }
+                        },
+                        new TreeItem { Text = "Dig escape tunnels for staff", Value = 71 },
+                        new TreeItem
+                        { 
+                            Text = "Build a transparent dome over the theme park", 
+                            Expanded = false,
+                            Items = new()
+                            {
+                                new TreeItem { Text = "Check seismic activity", Status = TreeItemStatus.ToDo, Value = 15 }
+                            }
+                        },
+                        new TreeItem { Text = "Install entrance checkpoints", Value = 50 }
+                    }
+                },
+                new TreeItem
+                { 
+                    Text = "Marketing + PR activities", 
+                    Status = TreeItemStatus.InProgress, 
+                    Items = new()
+                    {
+                        new TreeItem
+                        { 
+                            Text = "New folders", 
+                            Status = TreeItemStatus.Open, 
+                            Items = new()
+                            {
+                                new TreeItem { Text = "Advertising", Value = 25 },
+                                new TreeItem { Text = "Backlog Breakdown Plugin requirements", Status = TreeItemStatus.ToDo, Value = 10 },
+                                new TreeItem { Text = "30-minute TV advertisement for prime-time broadcast/superbowl etc.", Value = 35 },
+                                new TreeItem { Text = "Celebrity endorsements", Status = TreeItemStatus.InProgress, Value = 90 },
+                            }
+                        },
+                        new TreeItem { Text = "Anti-PR campaign to discredit safety of competing theme parks", Status = TreeItemStatus.InProgress, Value = 76 },
+                    }
+                },
+                new TreeItem
+                { 
+                    Text = "Rides + attractions", 
+                    Status = TreeItemStatus.Open, 
+                    Items = new()
+                    {
+                        new TreeItem { Text = "Redefine the Standard Model of particle physics", Value = 25 },
+                        new TreeItem { Text = "Arrange black hole insurance", Status = TreeItemStatus.Complete, Value = 100 },
+                        new TreeItem { Text = "Automatic hyper-drive engine warm up when enemy ships are close", Status = TreeItemStatus.ToDo, Value = 5 },
+                        new TreeItem { Text = "Use reverse hyper-driving to accumulate energy on braking", Status = TreeItemStatus.ToDo, Value = 15 },
+                        new TreeItem { Text = "Fuel Efficiency", Value = 30 },
+                    }
+                }
+            }
+        }
+    };
+
+    // Initialization ----------------------------------------------------------------------------------------------------------
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Update the color of progress value for each item
+            foreach (TreeItem item in items)
+                updateProgressValue(item);
+        }
+    }
+
+    // Events ------------------------------------------------------------------------------------------------------------------
+
+    private void sliderValueChanged(double value, TreeItem? item)
+    {
+        if (item is not null)
+        {
+            item.Value = value;
+            updateStatus(item);
+            updateParentProgressValue(item);
+        }
+    }
+
+    // Methods -----------------------------------------------------------------------------------------------------------------
+
+    private double getItemValue(TreeItem? item)
+    {
+        return item?.Value ?? 0;
+    }
+
+    private bool isThereChildren(TreeItem? item)
+    {
+        return item?.Items.Count > 0;
+    }
+
+    private double getParentProgressFromChildren(TreeItem? parent)
+    {
+        if (parent is not null)
+        {
+            if (parent.Items.Count > 0)
+            {
+                double result = 0;
+                foreach (TreeItem childItem in parent.Items)
+                    result += getParentProgressFromChildren(childItem);
+
+                parent.Value = result / parent.Items.Count;
+            }
+
+            return parent.Value;
+        }
+
+        return 0;
+    }
+
+    private void updateParentProgressValue(TreeItem? item)
+    {
+        TreeItem? parent = treeRef?.GetItemParent(item);
+        while (parent is not null)
+        {
+            updateProgressValue(parent);
+            parent = treeRef?.GetItemParent(parent);
+        }
+
+        StateHasChanged();
+    }
+
+    private void updateProgressValue(TreeItem? item)
+    {
+        if (item is not null)
+        {
+            item.Value = getParentProgressFromChildren(item);
+            updateStatus(item);
+        }
+    }
+
+    private void updateStatus(TreeItem? item)
+    {
+        if (item is not null)
+        {
+            if (item.Value < 30)
+                item.Status = TreeItemStatus.ToDo;
+            else if (item.Value < 60)
+                item.Status = TreeItemStatus.Open;
+            else if (item.Value < 90)
+                item.Status = TreeItemStatus.InProgress;
+            else
+                item.Status = TreeItemStatus.Complete;
+        }
+    }
+
+    // Styling ---------------------------------------------------------------------------------------------------------------
+
+    private string getIconClass(TreeItem? item)
+    {
+        string className = "trw-lyttmp-icons";
+
+        if (item is not null)
+        {
+            if (item.Items.Count > 0)
+                className += item.Expanded ? " expanded" : " collapsed";
+            else
+                className += " document";
+        }
+
+        return className;
+    }
+
+    private string getStatusStyle(TreeItem? item)
+    {  
+        string style = "";
+
+        if (item is not null)
+        {
+            
+            // Red
+            if (item.Value < 20)
+                style += "border-color: #f10808;color: #f10808;";
+            // Orange
+            else if (item.Value < 40)
+                style += "border-color: #e59011;color: #e59011;";
+            // Green
+            else if (item.Value < 60)
+                style += "border-color: #24aa24;color: #24aa24;";
+            // Blue
+            else if (item.Value < 80)
+                style += "border-color: #2276c3;color: #2276c3;";
+            // Purple
+            else
+                style += "border-color: #a83cd2;color: #a83cd2;";
+        }
+
+        return style;
+    }
+
+}

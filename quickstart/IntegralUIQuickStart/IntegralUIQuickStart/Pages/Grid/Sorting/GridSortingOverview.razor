@@ -1,0 +1,469 @@
+﻿@page "/grid/sorting/overview"
+
+<link rel="stylesheet" href="css/grid/sorting/GridSortingOverview.css?version=24.3.0" />
+
+<h2>Grid / Sorting Overview</h2>
+<div class="sample-block">
+    <IntegralUIGrid @ref=gridRef Id="grid-sorting-overview" TModel="CustomData" 
+    AllowAnimation="false" 
+    DataSource="@rowList"
+    ScrollAppearance="IntegralUIComponentAppearance.Static"
+    ShowFooter="false"
+    Size="@ctrlSize"
+    ColumnClick="@gridColumnClick"
+    ColumnMenuOpening="@gridColumnMenuOpening"
+    ColumnMenuClick="@gridColumnMenuClick">
+        <Columns>
+            <IntegralUIGridColumn Field="Country" MenuItems="@gridMenuItems" MenuPositionAdjustment="@gridMenuPositionAdjustment" Width="350"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Population" FormatSpecifier="N0" ContentAlignment="IntegralUIHorizontalAlignment.Right" Width="180"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="PercentWorld" HeaderText="% of World" FormatSpecifier="P2" ContentAlignment="IntegralUIHorizontalAlignment.Right" Width="150"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Date" FormatSpecifier="dd MMM yyyy" ContentAlignment="IntegralUIHorizontalAlignment.Center" Width="180"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Land" HeaderText="Land in km2" FormatSpecifier="N0" ContentAlignment="IntegralUIHorizontalAlignment.Right" Width="150"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Capital" ContentAlignment="IntegralUIHorizontalAlignment.Center" Width="200"></IntegralUIGridColumn>
+        </Columns>
+        <RowTemplate>
+            @switch (context.Cell?.Field)
+            {
+                case "Country":
+                    <div>
+                        <span class="grid-sorting-flags @(getCountryIcon((string?)context.Row?.Country))"></span>
+                        <span class="grid-sorting-country">@context.Row?.Country</span>
+                    </div>
+                    break;
+
+                default:
+                    <div class="grid-sorting-cell-label">@context.DisplayValue</div>
+                    break;
+            }
+        </RowTemplate>
+        <Styles>
+            <IntegralUIStyle TargetType="IntegralUITargetType.Row" ConditionIndex="@evenOddStyle" Background="#f9f9f9"></IntegralUIStyle>
+        </Styles>
+    </IntegralUIGrid>
+    <div class="feature-help">
+        <p><span class="initial-space"></span>This sample demonstrates single <strong>column sorting</strong> in the Grid component.</p>
+        <p><span class="initial-space"></span>If column cells contain a Date, Number or String value, sorting is executed using built-in sort operations, for which you only need to specify the column and the sort order, by which data will be sorted.</p>
+        <p><span class="initial-space"></span>For more advanced sorting, when column cells contains custom values, you can create a <span class="code-name">Comparer</span> function and create custom sorting operation in your code.</p>
+        <p><span class="initial-space"></span>The following properties and methods are presented:</p>
+        <ul class="feature-points">
+            <li><span class="code-name">ColumnClick</span> an event that occurs whenever column header is clicked</li>
+            <li><span class="code-name">Sort</span> a method which sorts the Grid data based on applied sort order for specified column</li>
+            <li><span class="code-name">Sorting</span> a property which determines the sort order</li>
+        </ul>
+        <p><span class="initial-space"></span>The 'Country' column has a <strong>menu button</strong> in its header. using this menu you can sort teh column and show/hide specific columns.</p>
+        <p><span class="initial-space"></span>In addition, <strong>Data Formatting</strong> is in use where numbers appear with commas and dates in standard format. All data formatting comes with standard format settings, which you can easily change by setting the <span class="code-name">Culture</span>, <span class="code-name">FormatSpecifier</span> and <span class="code-name">Locales</span> properties.</p>
+        <p><span class="initial-space"></span>Furthermore, with <strong>dynamic stylying</strong> alternate background colors are applied for rows based on their index.</p>
+    </div>
+</div>
+
+@code {
+
+    // Data
+    private class CustomData
+    {
+        public string? Country { get; set; }
+        public int Population { get; set; } = 0;
+        public double PercentWorld { get; set; } = 0;
+        public DateTime Date { get; set; } = DateTime.Today;
+        public int Land { get; set; } = 0;
+        public string? Capital { get; set; }
+
+        // State Properties
+        public bool Selected { get; set; } = false;
+    }
+
+    private List<CustomData> rowList = new()
+    {
+        new CustomData()
+        {
+            Country = "Egypt",
+            Population = 105914499,
+            PercentWorld = 0.013,
+            Date = new DateTime(2024, 1, 1),
+            Land = 995450,
+            Capital = "Cairo"
+        },
+        new CustomData()
+        {
+            Country = "Nigeria",
+            Population = 223800000,
+            PercentWorld = 0.028,
+            Date = new DateTime(2023, 7, 1),
+            Land = 910770,
+            Capital = "Abuja"
+        },
+        new CustomData()
+        {
+            Country = "South Africa",
+            Population = 63015904,
+            PercentWorld = 0.008,
+            Date = new DateTime(2024, 7, 30),
+            Land = 1213090,
+            Capital = "Pretoria"
+        },
+        new CustomData()
+        {
+            Country = "China",
+            Population = 1409670000,
+            PercentWorld = 0.173,
+            Date = new DateTime(2023, 12, 31),
+            Land = 9388211,
+            Capital = "Beijing"
+        },
+        new CustomData()
+        {
+            Country = "India",
+            Population = 1404910000,
+            PercentWorld = 0.173,
+            Date = new DateTime(2024, 7, 1),
+            Land = 2973190,
+            Capital = "New Delhi"
+        },
+        new CustomData()
+        {
+            Country = "Japan",
+            Population = 123780000,
+            PercentWorld = 0.015,
+            Date = new DateTime(2024, 9, 1),
+            Land = 364555,
+            Capital = "Tokyo"
+        },
+        new CustomData()
+        {
+            Country = "Saudi Arabia",
+            Population = 32175224,
+            PercentWorld = 0.004,
+            Date = new DateTime(2022, 5, 10),
+            Land = 2149690,
+            Capital = "Riyadh"
+        },
+        new CustomData()
+        {
+            Country = "South Korea",
+            Population = 51265238,
+            PercentWorld = 0.006,
+            Date = new DateTime(2024, 7, 31),
+            Land = 97230,
+            Capital = "Seoul"
+        },
+        new CustomData()
+        {
+            Country = "France",
+            Population = 68513000,
+            PercentWorld = 0.008,
+            Date = new DateTime(2024, 9, 1),
+            Land = 547557,
+            Capital = "Seoul"
+        },
+        new CustomData()
+        {
+            Country = "Germany",
+            Population = 84708010,
+            PercentWorld = 0.01,
+            Date = new DateTime(2024, 6, 30),
+            Land = 348560,
+            Capital = "Berlin"
+        },
+        new CustomData()
+        {
+            Country = "Italy",
+            Population = 58979364,
+            PercentWorld = 0.007,
+            Date = new DateTime(2024, 6, 30),
+            Land = 294140,
+            Capital = "Rome"
+        },
+        new CustomData()
+        {
+            Country = "Canada",
+            Population = 41288599,
+            PercentWorld = 0.005,
+            Date = new DateTime(2024, 7, 1),
+            Land = 9093510,
+            Capital = "Ottawa"
+        },
+        new CustomData()
+        {
+            Country = "Mexico",
+            Population = 129940228,
+            PercentWorld = 0.016,
+            Date = new DateTime(2024, 6, 30),
+            Land = 1943950,
+            Capital = "Mexico City"
+        },
+        new CustomData()
+        {
+            Country = "USA",
+            Population = 335893238,
+            PercentWorld = 0.041,
+            Date = new DateTime(2024, 1, 1),
+            Land = 9147420,
+            Capital = "Washington"
+        },
+        new CustomData()
+        {
+            Country = "Argentina",
+            Population = 47067441,
+            PercentWorld = 0.006,
+            Date = new DateTime(2024, 7, 1),
+            Land = 2736690,
+            Capital = "Buenos Aires"
+        },
+        new CustomData()
+        {
+            Country = "Brazil",
+            Population = 203080756,
+            PercentWorld = 0.025,
+            Date = new DateTime(2022, 8, 1),
+            Land = 8358140,
+            Capital = "Brasília"
+        }
+    };
+
+    // General
+    public IntegralUISize ctrlSize = new() { Height = 400 };
+
+    //
+    // Menu
+    //
+
+    public List<IntegralUIDataMenuItem> gridMenuItems = new()
+    {
+        new IntegralUIDataMenuItem() { Text = "Column Menu", Type = IntegralUIMenuItemType.Header },
+        new IntegralUIDataMenuItem() { AllowRadio = true, Checked = true, Text = "None" },
+        new IntegralUIDataMenuItem() { AllowRadio = true, Text = "Ascending" },
+        new IntegralUIDataMenuItem() { AllowRadio = true, Text = "Descending" }
+    };
+
+    private IntegralUIPosition gridMenuPositionAdjustment = new() { Left = -198, Top = 24 };
+
+    // References
+    private IntegralUIGrid<CustomData>? gridRef;
+
+    // Sorting
+    private IntegralUIDataColumn? prevSortColumn;
+    private IntegralUISortOrder sorting = IntegralUISortOrder.None;
+
+    //
+    // Initialization ---------------------------------------------------------------------------------------------------------
+    //
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && gridRef is not null)
+        {
+            // Make sure columns are present in the Grid prior getting them using GetColumns method
+            gridRef.UpdateLayout();
+
+            // Update Column Menu from all columns present in the Grid
+            List<IntegralUIDataColumn> columnList = gridRef.GetColumns();
+
+            gridMenuItems.Add(new() { Type = IntegralUIMenuItemType.Separator });
+
+            foreach (IntegralUIDataColumn column in columnList)
+            {
+                if (column.Field != "Country")
+                {
+                    string? menuItemText = column.HeaderText ?? column.Field;
+
+                    if (!string.IsNullOrEmpty(menuItemText))
+                        gridMenuItems.Add(new() { AllowCheck = true, Checked = true, Text = menuItemText, Value = column.Field });
+                }
+            }
+
+            // Update the Grid layout with new menu changes
+            await gridRef.UpdateLayoutAsync();
+
+            // Initially apply Sorting by Country in Ascending order
+            IntegralUIDataColumn? currentSortColumn = gridRef.GetColumnByField("Country");
+            if (currentSortColumn is not null)
+            {
+                currentSortColumn.Selected = true;
+                currentSortColumn.Sorting = IntegralUISortOrder.Ascending;
+                prevSortColumn = currentSortColumn;
+
+                await gridRef.Sort(currentSortColumn, currentSortColumn.Sorting ?? IntegralUISortOrder.Ascending);
+            }
+        }
+    }
+
+    // Data ------------------------------------------------------------------------------------------------------------------
+
+    private string? getCountryIcon(string? country)
+    {
+        string? retValue = country?.ToLower();
+
+        switch (retValue)
+        {
+            case "saudi arabia":
+                retValue = "saudi-arabia";
+                break;
+
+            case "south africa":
+                retValue = "south-africa";
+                break;
+
+            case "south korea":
+                retValue = "south-korea";
+                break;
+
+            case "united kingdom":
+                retValue = "uk";
+                break;
+
+            case "united states":
+                retValue = "usa";
+                break;
+        }
+
+        return retValue;
+    }
+
+    //
+    // Menu -------------------------------------------------------------------------------------------------------------------
+    //
+
+    private IntegralUIDataMenuItem? getGridMenuItemByText(string? text)
+    {
+        IntegralUIDataMenuItem? found = default;
+
+        foreach (IntegralUIDataMenuItem item in gridMenuItems)
+        {
+            if (item.Text == text)
+            {
+                found = item;
+                break;
+            }
+        }
+
+        return found;
+    }
+
+    private async Task gridColumnMenuClick(IntegralUIColumnMenuEventArgs e)
+    {
+        if (e.MenuItem is not null)
+        {
+            if (e.MenuItem.Value is not null)
+                await updateColumnVisibility(e.MenuItem);
+            else if (e.Column is not null)
+            {
+                switch (e.MenuItem.Text)
+                {
+                    case "None":
+                        e.Column.Sorting = IntegralUISortOrder.None;
+                        break;
+
+                    case "Ascending":
+                        e.Column.Sorting = IntegralUISortOrder.Ascending;
+                        break;
+
+                    case "Descending":
+                        e.Column.Sorting = IntegralUISortOrder.Descending;
+                        break;
+                }
+
+                gridRef?.Sort(e.Column, e.Column.Sorting ?? IntegralUISortOrder.None);
+            }
+        }
+    }
+
+    private void gridColumnMenuOpening(IntegralUIColumnMenuCancelEventArgs e)
+    {
+        if (e.Column is not null)
+        {
+            gridMenuItems[0].Text = !string.IsNullOrEmpty(e.Column.HeaderText) ? e.Column.HeaderText : e.Column.Field;
+
+            string? sortText = e.Column.Sorting.ToString();
+            Console.WriteLine($"gridColumnMenuOpening >>> {sortText}");
+
+            switch (sortText)
+            {
+                case "None":
+                    e.Column.Sorting = IntegralUISortOrder.None;
+                    break;
+
+                case "Ascending":
+                    e.Column.Sorting = IntegralUISortOrder.Ascending;
+                    break;
+
+                case "Descending":
+                    e.Column.Sorting = IntegralUISortOrder.Descending;
+                    break;
+            }
+
+            updateSortingMenuItems(sortText);
+        }
+    }
+
+    private void updateSortingMenuItems(string? text)
+    {
+        IntegralUIDataMenuItem? menuItem = getGridMenuItemByText("None");
+        if (menuItem is not null)
+            menuItem.Checked = string.IsNullOrEmpty(text) || text == "None";
+
+        menuItem = getGridMenuItemByText("Ascending");
+        if (menuItem is not null)
+            menuItem.Checked = text == "Ascending";
+
+        menuItem = getGridMenuItemByText("Descending");
+        if (menuItem is not null)
+            menuItem.Checked = text == "Descending";
+    }
+
+    private async Task updateColumnVisibility(IntegralUIDataMenuItem item)
+    {
+        if (gridRef is not null && item.Value is not null)
+        {
+            IntegralUIDataColumn? column = gridRef.GetColumnByField((string?)item.Value);
+
+            if (column is not null)
+            {
+                column.Visible = item.Checked;
+                await gridRef.UpdateLayoutAsync();
+            }
+        }
+    }
+
+    // Sorting ---------------------------------------------------------------------------------------------------------------
+
+    private void gridColumnClick(IntegralUIDataColumn column)
+    {
+        if (column is not null)
+        {
+            // Only change the order if same column is clicked
+            if (prevSortColumn is not null && !EqualityComparer<IntegralUIDataColumn>.Default.Equals(column, prevSortColumn))
+            {
+                prevSortColumn.Selected = false;
+                column.Sorting = prevSortColumn.Sorting;
+            }
+            else
+            {
+                switch (column.Sorting)
+                {
+                    case IntegralUISortOrder.Ascending:
+                        column.Sorting = IntegralUISortOrder.Descending;
+                        break;
+
+                    case IntegralUISortOrder.Descending:
+                        column.Sorting = IntegralUISortOrder.None;
+                        break;
+
+                    default:
+                        column.Sorting = IntegralUISortOrder.Ascending;
+                        break;
+                }
+            }
+
+            prevSortColumn = column;
+
+            gridRef?.Sort(column, column.Sorting ?? IntegralUISortOrder.Ascending);
+        }
+    }
+
+    // Styling ---------------------------------------------------------------------------------------------------------------
+
+    private bool evenOddStyle(object? obj, int index)
+    {
+        return index % 2 == 1;
+    }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "integralui-blazor",
+  "version": "24.3.0",
+  "description": "IntegralUI for Blazor is UI library of advanced, customizable and high performance components for Blazor .NET.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lidorsystems/integralui-blazor.git"
+  },
+  "keywords": [
+    "components",
+    "integralui",
+    "ui",
+    "blazor",
+    "blazor-components",
+    "data-grid",
+    "grid",
+    "treeview",
+    "dotnet",
+    "net",
+    "visual",
+    "studio"
+  ],
+  "author": "Lidor Systems",
+  "license": "SEE LICENSE in LICENSE.md",
+  "homepage": "https://www.lidorsystems.com/products/integralui/blazor/",
+  "bugs": {
+    "url": "https://github.com/lidorsystems/integralui-blazor/issues"
+  }
+}

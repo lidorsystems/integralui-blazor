@@ -1,0 +1,17 @@
+﻿[id="grid-form-editing"] {
+    --iui-grid-column-footer-font-weight: bold;
+    --iui-grid-column-header-fixed-background: #568cba;
+    --iui-grid-column-header-fixed-border-color: #568cba;
+    --iui-grid-column-header-fixed-color: white;
+    --iui-grid-column-header-hovered-fixed-background: #568cba;
+    --iui-grid-column-header-hovered-fixed-border-color: #568cba;
+    --iui-grid-column-header-hovered-fixed-color: white;
+    --iui-grid-column-header-selected-fixed-background: #568cba;
+    --iui-grid-column-header-selected-fixed-border-color: #568cba;
+    --iui-grid-column-header-selected-fixed-color: white;
+    --iui-grid-column-header-fixed-left-last-border-color: #568cba #808080 #568cba #568cba;
+    --iui-grid-column-header-fixed-left-last-box-shadow: 1px 0 5px #999999;
+    --iui-grid-block-left-fixed-border-right-color: #808080;
+    --iui-grid-block-left-fixed-box-shadow: 1px 0 5px #999999;
+    --iui-grid-editing-background-image: url(/resources/icons/edit.ico);
+}

@@ -1,0 +1,557 @@
+﻿@page "/grid/overview"
+@inject HttpClient Http
+
+<link rel="stylesheet" href="css/grid/GridOverview.css?version=24.3.0" />
+
+<h2>Grid / Overview</h2>
+<div class="sample-block">
+    <IntegralUIGrid @ref=gridRef Id="grid-overview" TModel="CustomData"
+        AllowAnimation="false"
+        AllowFilter="true"
+        AllowPaging="true" 
+        DataColumns="@gridColumns"
+        DataSource="@gridRows"
+        EditMode="IntegralUIEditMode.Form"
+        PageSize="10"
+        ShowFooter="false"
+        Size="@gridSize"
+        UseValidation="true"
+        ColumnClick="@gridColumnClick"
+        ColumnMenuOpening="@gridColumnMenuOpening"
+        ColumnMenuClick="@gridColumnMenuClick"
+        DataChanged="@gridDataChanged"
+        DataInvalid="@gridDataInvalid"
+        RowDblClick="@gridRowDblClick">
+        <Columns>
+            @foreach (IntegralUIDataColumn column in gridColumns)
+            {
+                @if (column.Field == "ShipMode")
+                {
+                    <IntegralUIGridColumn Data="@column" MenuPositionAdjustment="@gridMenuPositionAdjustment">
+                        <FilterTemplate>
+                            <IntegralUIList Id="grid-overview-shipmode-list" TItem="ShipModeObject"
+                                CheckBoxes="true"
+                                Items="@shipModeOptions"
+                                MaxVisibleItems="4">
+                                <ItemTemplate Context="option">
+                                    <span>@option.Item?.Value</span>
+                                </ItemTemplate>
+                            </IntegralUIList>
+                        </FilterTemplate>
+                        <Validation>
+                            <IntegralUIGridValidationRule Message="Please specify the Ship Mode" Validate="@validateShipMode" Type="IntegralUIDataValidationRuleType.Custom"></IntegralUIGridValidationRule>
+                        </Validation>
+                    </IntegralUIGridColumn>
+                }
+                else
+                {
+                    <IntegralUIGridColumn Data="@column" MenuPositionAdjustment="@gridMenuPositionAdjustment">
+                        <Validation>
+                            @switch (column.Field)
+                            {
+                                case "OrderID":
+                                    <IntegralUIGridValidationRule Message="OrderID is required" Type="IntegralUIDataValidationRuleType.Required"></IntegralUIGridValidationRule>
+                                    break;
+
+                                case "Customer":
+                                    <IntegralUIGridValidationRule Message="Customer is required" Type="IntegralUIDataValidationRuleType.Required"></IntegralUIGridValidationRule>
+                                    break;
+
+                                case "ProductName":
+                                    <IntegralUIGridValidationRule Message="Product Name is required" Type="IntegralUIDataValidationRuleType.Required"></IntegralUIGridValidationRule>
+                                    break;
+
+                                case "OrderDate":
+                                    <IntegralUIGridValidationRule Message="Order Date must be after 01 Jan 2022" Min="@("2022-01-01T00:00:00.000Z")" Type="IntegralUIDataValidationRuleType.Range"></IntegralUIGridValidationRule>
+                                    break;
+
+                                case "Quantity":
+                                    <IntegralUIGridValidationRule Message="Quantity must be greater than 0" ComparisonOperator="IntegralUIComparisonOperator.GreaterThan" Value="0" Type="IntegralUIDataValidationRuleType.Compare"></IntegralUIGridValidationRule>
+                                    break;
+
+                                case "Price":
+                                    <IntegralUIGridValidationRule Message="Price must be greater than 0" ComparisonOperator="IntegralUIComparisonOperator.GreaterThan" Value="0" Type="IntegralUIDataValidationRuleType.Compare"></IntegralUIGridValidationRule>
+                                    break;
+                            }
+                        </Validation>
+                    </IntegralUIGridColumn>
+                }
+            }
+        </Columns>
+        <Styles>
+            <IntegralUIStyle TargetType="IntegralUITargetType.Row" ConditionIndex="@evenOddStyle" Background="#f9f9f9"></IntegralUIStyle>
+        </Styles>
+    </IntegralUIGrid>
+    <div class="feature-help">
+        <p><span class="initial-space"></span><strong><span class="code-name">IntegralUI</span> Grid</strong> is a Blazor Component that displays tabular data sets with advanced Editing, Grouping, Pagination, Filtering, Sorting and more. You can load data on demand during run-time from local or remote data sources, and modify the Grid appearance using custom templates, dynamic styles and CSS properties.</p>
+        <p><span class="initial-space"></span>In this example, the Grid presents the following features:</p>
+        <ul class="feature-points">
+            <li><strong>Data Formatting</strong> - Each column displays data using standard Currency, Date, Numeric and String formats including localization</li>
+            <li><strong>Editing with Form Validation</strong> - Edit Grid data using a built-in Form with different validation rules: Compare, Required, Numeric, Range, StringLength and Custom</li>
+            <li><strong>Filter Chain</strong> - Create Filter Chain using filtering panel for Date, Number, String and Custom filter operations</li>
+            <li><strong>Pagination</strong> - Divide Grid data in multiple pages with option to change page size</li>
+            <li><strong>Sorting</strong> - Apply sorting from column menu or by click on column header. Sorting for some columns is disabled</li>
+            <li><strong>Fixed Columns</strong> - Fix columns on Left or Right side</li>
+            <li><strong>Column Menu</strong> - A menu for sorting and showing or hidding specific columns</li>
+            <li><strong>Styling</strong> - The Grid appearance is customizable using dynamic styles and by modifying CSS custom properties</li>
+        </ul>
+    </div>
+</div>
+
+@code {
+
+    //
+    // Data
+    //
+
+    // Data Model
+    private class CustomData
+    {
+        public string? Customer { get; set; }
+        public string? OrderDate { get; set; }
+        public string? OrderID { get; set; }
+        public double Price { get; set; }
+        public string? ProductName { get; set; }
+        public int Quantity { get; set; }
+        public string? ShipDate { get; set; }
+        public DeliveryOption ShipMode { get; set; } = DeliveryOption.None;
+        public double ShippingCost { get; set; }
+        public double Total { get; set; }
+
+        // State Properties
+        public bool Checked { get; set; } = false;
+        public bool Selected { get; set; } = false;
+    }
+
+    public enum DeliveryOption
+    {
+        None,
+        DeliveryTruck,
+        RegularAir,
+        ExpressAir
+    }
+
+    private List<IntegralUIDataColumn> gridColumns = [];
+    private List<CustomData>? gridRows = [];
+    public IntegralUISize gridSize = new() { Height = 500 };
+
+    //
+    // Editing
+    //
+
+    private IntegralUIEditorSettings shipModeEditorSettings = new()
+    {
+        Items = new List<IntegralUIDataItem>()
+        {
+            new IntegralUIDataItem() { Text = "None", Value = DeliveryOption.None },
+            new IntegralUIDataItem() { Text = "DeliveryTruck", Value = DeliveryOption.DeliveryTruck },
+            new IntegralUIDataItem() { Text = "RegularAir", Value = DeliveryOption.RegularAir },
+            new IntegralUIDataItem() { Text = "ExpressAir", Value = DeliveryOption.ExpressAir }
+        }
+    };
+
+
+    //
+    // Filtering - Custom for ShipMode Column
+    //
+
+    private IntegralUIFilterParameters shipModeFilterParams = new();
+    private IntegralUISize shipModeListSize = new() { Width = 350 };
+
+    public class ShipModeObject
+    {
+        public bool Checked { get; set; } = false;
+        public DeliveryOption Value { get; set; } = DeliveryOption.None;
+    }
+
+    public List<ShipModeObject> shipModeOptions = new()
+    {
+        new ShipModeObject() { Value = DeliveryOption.None },
+        new ShipModeObject() { Value = DeliveryOption.DeliveryTruck },
+        new ShipModeObject() { Value = DeliveryOption.RegularAir },
+        new ShipModeObject() { Value = DeliveryOption.ExpressAir }
+    };
+
+    //
+    // Menu
+    //
+
+    public List<IntegralUIDataMenuItem> gridMenuItems = new()
+    {
+        new IntegralUIDataMenuItem() { Text = "Column Menu", Type = IntegralUIMenuItemType.Header },
+        new IntegralUIDataMenuItem() { AllowRadio = true, Checked = true, Text = "None" },
+        new IntegralUIDataMenuItem() { AllowRadio = true, Text = "Ascending" },
+        new IntegralUIDataMenuItem() { AllowRadio = true, Text = "Descending" }
+    };
+
+    private IntegralUIPosition gridMenuPositionAdjustment = new() { Left = -148, Top = 24 };
+
+    //
+    // References
+    //
+
+    private IntegralUIGrid<CustomData>? gridRef;
+
+    //
+    // Sorting
+    //
+
+    private IntegralUIDataColumn? prevSortColumn;
+    private IntegralUISortOrder sorting = IntegralUISortOrder.None;
+
+    //
+    // Initialization ---------------------------------------------------------------------------------------------------------
+    //
+
+    public GridOverview()
+    {
+        // Custom Filter method for ShipMode column
+        shipModeFilterParams.Filter = filterByShipMode;
+
+        // Columns
+        gridColumns = new()
+        {
+            new IntegralUIDataColumn()
+            {
+                Field = "Checked",
+                AllowSort = false,
+                EditorType = IntegralUIEditorType.CheckBox,
+                Fixed = IntegralUIFixedStyle.Left,
+                FixedWidth = true,
+                HeaderText = "",
+                Width = 30
+            },
+            new IntegralUIDataColumn()
+            {
+                Field = "OrderID",
+                AllowSort = false,
+                EditorType = IntegralUIEditorType.Text,
+                Fixed = IntegralUIFixedStyle.Left,
+                HeaderText = "Order ID",
+                Width = 120
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                Field = "Customer",
+                EditorType = IntegralUIEditorType.Text,
+                Fixed = IntegralUIFixedStyle.Left,
+                MenuItems = gridMenuItems,
+                Width = 250
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                Field = "ProductName",
+                EditorType = IntegralUIEditorType.Text,
+                HeaderText = "Product Name",
+                MenuItems = gridMenuItems,
+                Width = 200
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Center,
+                Field = "OrderDate",
+                EditorType = IntegralUIEditorType.Date,
+                FilterType = IntegralUIFilterType.Date,
+                FormatSpecifier = "dd MMM yyyy",
+                HeaderText = "Order Date",
+                Width = 180
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                AllowSort = false,
+                ContentAlignment = IntegralUIHorizontalAlignment.Center,
+                Field = "ShipMode",
+                EditorSettings = shipModeEditorSettings,
+                EditorType = IntegralUIEditorType.DropDownList,
+                FilterParameters = shipModeFilterParams,
+                FilterType = IntegralUIFilterType.Custom,
+                HeaderText = "Ship Mode",
+                Width = 240
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Right,
+                Field = "Quantity",
+                EditorType = IntegralUIEditorType.Numeric,
+                FilterType = IntegralUIFilterType.Numeric,
+                FormatSpecifier = "N0",
+                FooterAlignment = IntegralUIHorizontalAlignment.Right,
+                Width = 150
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Right,
+                Field = "Price",
+                EditorType = IntegralUIEditorType.Numeric,
+                FilterType = IntegralUIFilterType.Numeric,
+                FormatSpecifier = "C2",
+                Width = 200
+            },
+            new IntegralUIDataColumn()
+            {
+                AllowFilter = true,
+                ContentAlignment = IntegralUIHorizontalAlignment.Right,
+                Field = "Total",
+                FilterType = IntegralUIFilterType.Numeric,
+                FormatSpecifier = "C2",
+                FooterAlignment = IntegralUIHorizontalAlignment.Right,
+                MenuItems = gridMenuItems,
+                Width = 240
+            }
+        };
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Get the data from the grid-orders.json file
+        List<CustomData>? data = await Http.GetFromJsonAsync<List<CustomData>>("data/grid-orders.json");
+        if (data is not null)
+        {
+            gridRows = data;
+            StateHasChanged();
+
+            // Update Total value for each row based on Quantity and Price
+            foreach (CustomData obj in gridRows)
+                obj.Total = obj.Quantity * obj.Price;
+
+            if (gridRef is not null)
+            {
+                // Update Column Menu from all columns present in the Grid
+                List<IntegralUIDataColumn> columnList = gridRef.GetColumns();
+
+                gridMenuItems.Add(new() { Type = IntegralUIMenuItemType.Separator });
+
+                foreach (IntegralUIDataColumn column in columnList)
+                {
+                    if (column.Field != "Checked" && column.Field != "OrderID" && column.Field != "Customer")
+                    {
+                        string? menuItemText = column.HeaderText ?? column.Field;
+
+                        if (!string.IsNullOrEmpty(menuItemText))
+                            gridMenuItems.Add(new() { AllowCheck = true, Checked = true, Text = menuItemText, Value = column.Field });
+                    }
+                }
+
+                // Update the Grid layout with new data
+                await gridRef.UpdateLayoutAsync();
+            }
+        }
+    }
+
+    //
+    // Custom Filter --------------------------------------------------------------------------------------------------------
+    //
+
+    private bool filterByShipMode(object? value, object? obj)
+    {
+        bool retValue = false;
+
+        if (value is not null && value.GetType() == typeof(DeliveryOption))
+        {
+            DeliveryOption shipMode = (DeliveryOption)value;
+
+            foreach (ShipModeObject option in shipModeOptions)
+            {
+                if (option.Checked && option.Value == shipMode)
+                {
+                    retValue = true;
+                    break;
+                }
+            }
+        }
+
+        return retValue;
+    }
+
+    //
+    // Editing --------------------------------------------------------------------------------------------------------------
+    //
+
+    private void gridDataChanged(IntegralUIGridDataEventArgs<CustomData> e)
+    {
+        // Update the Total value when Quantity or Price changes
+        if (e.Data is not null)
+        {
+            CustomData row = e.Data;
+            row.Total = row.Quantity * row.Price;
+
+            gridRef?.UpdateLayout();
+        }
+    }
+
+    private void gridDataInvalid(IntegralUIGridDataEventArgs<CustomData> e)
+    {
+        Console.WriteLine("Some data fields are invalid!");
+    }
+
+    private void gridRowDblClick(CustomData row)
+    {
+        gridRef?.BeginEdit(row);
+    }
+
+    //
+    // Menu -------------------------------------------------------------------------------------------------------------------
+    //
+
+    private IntegralUIDataMenuItem? getGridMenuItemByText(string? text)
+    {
+        IntegralUIDataMenuItem? found = default;
+
+        foreach (IntegralUIDataMenuItem item in gridMenuItems)
+        {
+            if (item.Text == text)
+            {
+                found = item;
+                break;
+            }
+        }
+
+        return found;
+    }
+
+    private async Task gridColumnMenuClick(IntegralUIColumnMenuEventArgs e)
+    {
+        if (e.MenuItem is not null)
+        {
+            if (e.MenuItem.Value is not null)
+                await updateColumnVisibility(e.MenuItem);
+            else if (e.Column is not null)
+            {
+                switch (e.MenuItem.Text)
+                {
+                    case "None":
+                        e.Column.Sorting = IntegralUISortOrder.None;
+                        break;
+
+                    case "Ascending":
+                        e.Column.Sorting = IntegralUISortOrder.Ascending;
+                        break;
+
+                    case "Descending":
+                        e.Column.Sorting = IntegralUISortOrder.Descending;
+                        break;
+                }
+
+                gridRef?.Sort(e.Column, e.Column.Sorting ?? IntegralUISortOrder.None);
+            }
+        }
+    }
+
+    private void gridColumnMenuOpening(IntegralUIColumnMenuCancelEventArgs e)
+    {
+        if (e.Column is not null)
+        {
+            gridMenuItems[0].Text = !string.IsNullOrEmpty(e.Column.HeaderText) ? e.Column.HeaderText : e.Column.Field;
+
+            string? sortText = e.Column.Sorting.ToString();
+            switch (sortText)
+            {
+                case "None":
+                    e.Column.Sorting = IntegralUISortOrder.None;
+                    break;
+
+                case "Ascending":
+                    e.Column.Sorting = IntegralUISortOrder.Ascending;
+                    break;
+
+                case "Descending":
+                    e.Column.Sorting = IntegralUISortOrder.Descending;
+                    break;
+            }
+
+            updateSortingMenuItems(sortText);
+        }
+    }
+
+    private void updateSortingMenuItems(string? text)
+    {
+        IntegralUIDataMenuItem? menuItem = getGridMenuItemByText("None");
+        if (menuItem is not null)
+            menuItem.Checked = string.IsNullOrEmpty(text) || text == "None";
+
+        menuItem = getGridMenuItemByText("Ascending");
+        if (menuItem is not null)
+            menuItem.Checked = text == "Ascending";
+
+        menuItem = getGridMenuItemByText("Descending");
+        if (menuItem is not null)
+            menuItem.Checked = text == "Descending";
+    }
+
+    private async Task updateColumnVisibility(IntegralUIDataMenuItem item)
+    {
+        if (gridRef is not null && item.Value is not null)
+        {
+            IntegralUIDataColumn? column = gridRef.GetColumnByField((string?)item.Value);
+
+            if (column is not null)
+            {
+                column.Visible = item.Checked;
+                await gridRef.UpdateLayoutAsync();
+            }
+        }
+    }
+
+    //
+    // Sorting ---------------------------------------------------------------------------------------------------------------
+    //
+
+    private void gridColumnClick(IntegralUIDataColumn column)
+    {
+        if (column is not null && column.AllowSort)
+        {
+            // Only change the order if same column is clicked
+            if (prevSortColumn is not null && !EqualityComparer<IntegralUIDataColumn>.Default.Equals(column, prevSortColumn))
+                column.Sorting = prevSortColumn.Sorting;
+            else
+            {
+                switch (column.Sorting)
+                {
+                    case IntegralUISortOrder.Ascending:
+                        column.Sorting = IntegralUISortOrder.Descending;
+                        break;
+
+                    case IntegralUISortOrder.Descending:
+                        column.Sorting = IntegralUISortOrder.None;
+                        break;
+
+                    default:
+                        column.Sorting = IntegralUISortOrder.Ascending;
+                        break;
+                }
+            }
+
+            prevSortColumn = column;
+
+            gridRef?.Sort(column, column.Sorting ?? IntegralUISortOrder.Ascending);
+        }
+    }
+
+    //
+    // Styling ---------------------------------------------------------------------------------------------------------------
+    //
+
+    private bool evenOddStyle(object? obj, int index)
+    {
+        return index % 2 == 1;
+    }
+
+    //
+    // Validation ------------------------------------------------------------------------------------------------------------
+    //
+
+    private bool validateShipMode(object? value)
+    {
+        if (value is not null && (value.GetType() == typeof(DeliveryOption) || value.GetType() == typeof(int)))
+            return Convert.ToInt32(value) > 0;
+
+        return false;
+    }
+}

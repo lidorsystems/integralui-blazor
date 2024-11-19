@@ -1,0 +1,17 @@
+﻿
+[id="contextmenu-overview"] {
+    --iui-contextmenu-width: 200px;
+}
+
+.cmnu-ovw-block {
+    background: white;
+    border: thin solid gray;
+    height: 300px;
+}
+.cmnu-ovw-block span {
+    color: #808080;
+    cursor: default;
+    display: block;
+    margin: 140px auto;
+    text-align: center;
+}

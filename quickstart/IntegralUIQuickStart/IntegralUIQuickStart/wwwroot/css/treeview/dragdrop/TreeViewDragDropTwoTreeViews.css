@@ -1,0 +1,41 @@
+﻿[id="treeview-1"] {
+    --iui-treeview-float: left;
+    --iui-treeview-margin: 0 20px 0 0;
+}
+
+[id="treeview-2"] {
+    --iui-treeview-float: left;
+    --iui-treeview-margin: 0 20px 0 0;
+}
+
+.sample-block-treeview-dragdrop-two-lists {
+    display: inline-block;
+    margin-top: 20px
+}
+.sample-block-treeview-dragdrop-two-lists > div {
+    float: left;
+    width: 350px;
+
+    --iui-checkbox-margin: 0 10px;
+}
+.trw-dd2trw-icons {
+    background: url(/resources/icons-x24.png) no-repeat 0 0;
+    display: inline-block;
+    padding: 0;
+    margin: 0 3px;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+
+.collapsed {
+    background-position: -120px -144px;
+}
+
+.expanded {
+    background-position: -144px -144px;
+}
+
+.document {
+    background-position: 0 -96px;
+}

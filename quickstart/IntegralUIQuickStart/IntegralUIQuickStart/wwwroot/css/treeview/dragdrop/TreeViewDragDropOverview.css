@@ -1,0 +1,42 @@
+﻿[id="treeview-dragdrop-overview"] {
+    --iui-treeview-display: inline-block;
+}
+
+.sample-block-ddlb-overview-panel {
+    margin-top: 20px;
+    text-align: center;
+    width: 350px;
+}
+
+.sample-block-ddlb-control-panel {
+    display: inline-block;
+    margin: 0 0 0 20px;
+    text-align: left;
+    vertical-align: top;
+    width: 150px;
+
+    --iui-checkbox-display: block;
+    --iui-checkbox-margin: 5px 0;
+}
+.trw-ddovw-icons {
+    background: url(/resources/icons-x24.png) no-repeat 0 0;
+    display: inline-block;
+    padding: 0;
+    margin: 0 3px;
+    width: 24px;
+    height: 24px;
+    vertical-align: top;
+}
+.collapsed {
+    background-position: -120px -144px;
+}
+.expanded {
+    background-position: -144px -144px;
+}
+.document {
+    background-position: 0 -96px;
+}
+.trw-ddovw-item-label {
+    display: inline-block;
+    margin: 5px 0 0 0;
+}

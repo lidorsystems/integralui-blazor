@@ -1,0 +1,440 @@
+﻿@page "/grid/pagination/overview"
+@inject HttpClient Http
+
+<link rel="stylesheet" href="css/grid/pagination/GridPaginationOverview.css?version=24.3.0" />
+
+<h2>Grid / Pagination Overview</h2>
+<div class="sample-block">
+    <IntegralUIGrid @ref=gridRef Id="grid-pagination-overview" TModel="CustomData"
+                    AllowAnimation="false"
+                    AllowPaging="true"
+                    DataGroups="@activeGroups"
+                    DataSource="@gridRows"
+                    Grouping="@groupingSettings"
+                    MouseWheelSpeed="IntegralUISpeedMode.VerySlow"
+                    RowHeight="52"
+                    PageSize="5"
+                    ShowFooter="false"
+                    Size="@gridSize">
+        <Columns>
+            <IntegralUIGridColumn Field="Stock" HeaderText="Stock / Company" AllowGrouping="false" Fixed="IntegralUIFixedStyle.Left" Width="300"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Last" AllowGrouping="false" Fixed="IntegralUIFixedStyle.Left" FormatSpecifier="N2" ContentAlignment="IntegralUIHorizontalAlignment.Right" Width="120"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="ChangePercent" AllowGrouping="false" HeaderText="Change %" FormatSpecifier="P2" ContentAlignment="IntegralUIHorizontalAlignment.Right"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Change" AllowGrouping="false" FormatSpecifier="N2" ContentAlignment="IntegralUIHorizontalAlignment.Right"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Rating" AllowGrouping="false" FormatSpecifier="N0"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="MKTCap" AllowGrouping="false" HeaderText="MKT Cap" FormatSpecifier="N0" ContentAlignment="IntegralUIHorizontalAlignment.Right" Width="140"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="PE" AllowGrouping="false" HeaderText="P/E" FormatSpecifier="N2" ContentAlignment="IntegralUIHorizontalAlignment.Right" Width="120"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="EPS" AllowGrouping="false" FormatSpecifier="N2" ContentAlignment="IntegralUIHorizontalAlignment.Right" Width="120"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Sector" Width="275"></IntegralUIGridColumn>
+            <IntegralUIGridColumn Field="Country" Width="200"></IntegralUIGridColumn>
+        </Columns>
+        <RowTemplate>
+            @switch (context.Cell?.Field)
+            {
+                case "Stock":
+                    if (context.Type == IntegralUIRowType.Group)
+                    {
+                        if (context.Cell.GroupField == "Country")
+                        {
+                            <div style="display: inline-block">
+                                <span class="grid-pagination-flags @(getCountryIcon((string?)context.DisplayValue))"></span>
+                                <span class="grid-pagination-country">@context.DisplayValue</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="grid-pagination-group-label">@context.DisplayValue</div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="grid-pagination-cell-company">
+                            <div><strong style="font-weight:bold;">@context.Row?.Stock</strong></div>
+                            <div>@context.Row?.Company</div>
+                        </div>
+                    }
+                    break;
+
+                case "Rating":
+                    <div class="grid-pagination-cell-label">@getCellValue(@context.Value)</div>
+                    break;
+
+                case "Country":
+                    <div>
+                        <span class="grid-pagination-flags @(context.Row?.Icon)"></span>
+                        <span class="grid-pagination-country">@context.Row?.Country</span>
+                    </div>
+                    break;
+
+                default:
+                    <div class="grid-pagination-cell-label">@context.DisplayValue</div>
+                    break;
+            }
+        </RowTemplate>
+        <Styles>
+            <IntegralUIStyle TargetType="IntegralUITargetType.Row" ConditionIndex="@evenOddStyle" Background="#f9f9f9"></IntegralUIStyle>
+            <IntegralUIStyle TargetType="IntegralUITargetType.Cell" Condition="@redStyle" Color="red"></IntegralUIStyle>
+            <IntegralUIStyle TargetType="IntegralUITargetType.Cell" Condition="@greenStyle" Color="green"></IntegralUIStyle>
+            <IntegralUIStyle TargetType="IntegralUITargetType.Cell" Condition="@blueStyle" Color="blue"></IntegralUIStyle>
+        </Styles>
+    </IntegralUIGrid>
+    <div class="feature-help">
+        <p><span class="initial-space"></span>This example shows how to load data from a JSON file and divide it in multiple pages.</p>
+        <p><span class="initial-space"></span>You can set the page size, which determines the maximum number of root rows per page. If you have rows with children, child rows are excluded from this number.</p>
+        <p><span class="initial-space"></span>You can navigate through grid data using pagination buttons or through code by using these built-in methods and events:</p>
+        <ul class="feature-points">
+            <li><span class="code-name">CurrentPage</span> - Gets or sets the number of page currently visible in grid view</li>
+            <li><span class="code-name">FirstPage</span> - the first page is shown in the grid view</li>
+            <li><span class="code-name">LastPage</span> - the last page is shown in the grid view</li>
+            <li><span class="code-name">NextPage</span> - moves to the next page</li>
+            <li><span class="code-name">PrevPage</span> - moves to the previous page</li>
+            <li><span class="code-name">PageChanged</span> - occurs when current page changes</li>
+        </ul>
+        <br/>
+        <p><span class="initial-space"></span>In addition, the following features are presented:</p>
+        <ul class="feature-points">
+            <li><strong>Dynamic Grouping</strong> - you can arrange data in groups from grouping panel (above grid header). Two groups are available: Sector and Country</li>
+            <li><strong>Loading</strong> - initial data is loaded from a JSON file</li>
+            <li><strong>Update</strong> - every 250ms a set of rows is randomly selected and its data changed. All related cells are updated accordingly.</li>
+            <li><strong>Cell Templates</strong> - some cells shows data in different colors and layouts</li>
+            <li><strong>Data Formatting</strong> - numerical values like % and large numbers are automatically converted using standard numeric data formats</li>
+            <li><strong>Fixed Columns</strong> - first two columns: "Company" and "Last" are fixed on left side</li>
+        </ul>
+    </div>
+</div>
+
+@code {
+
+    //
+    // Data
+    //
+
+    private class CustomData
+    {
+        public string? Stock { get; set; }
+        public string? Company { get; set; }
+        public string? Sector { get; set; }
+        public string? MKTCap { get; set; }
+        public int Rating { get; set; }
+        public int Volume { get; set; }
+        public double PE { get; set; }
+        public double ChangePercent { get; set; }
+        public double EPS { get; set; }
+        public double DivYield { get; set; }
+        public double AllTimeLow { get; set; }
+        public double AllTimeHigh { get; set; }
+        public double Last { get; set; }
+        public string? Icon { get; set; }
+        public string? Country { get; set; }
+        public double Change { get; set; }
+
+        // State Properties
+        public bool Selected { get; set; } = false;
+    }
+
+    private List<CustomData>? gridRows = [];
+
+    //
+    // General
+    //
+
+    private IntegralUISize gridSize = new() { Height = 500 };
+    private bool _disposedValue = false;
+    private bool isDestroyed = false;
+
+    //
+    // Grouping
+    //
+
+    private List<IntegralUIDataGroup> activeGroups = new()
+    {
+        new()
+        {
+            Field = "Sector",
+            ShowExpandBox = true,
+            ShowSorting = true
+         }
+    };
+
+    private IntegralUIGridGrouping groupingSettings = new()
+        {
+            Enabled = true,
+            ExpandBox = true,
+            ShowColumns = true,
+            Sorting = true
+        };
+
+    //
+    // References
+    //
+    private IntegralUIGrid<CustomData>? gridRef;
+
+    //
+    // Timers
+    //
+    protected System.Threading.Timer? initTimeout = null;
+
+
+    // Initialization ---------------------------------------------------------------------------------------------------------
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Get the data from the grid-stocks.json file
+        gridRows = await Http.GetFromJsonAsync<List<CustomData>>("data/grid-stocks.json");
+        StateHasChanged();
+
+        // Update the Grid layout with new data
+        if (gridRef is not null)
+            await gridRef.UpdateLayoutAsync();
+
+        // Create a timer that will frequently change the Grid data
+        initTimeout = new Timer(async (_) =>
+        {
+            await updateData();
+        }, null, 1000, -1);
+    }
+
+    // Destruction -----------------------------------------------------------------------------------------------------------
+
+    protected void clearInitTimer()
+    {
+        if (initTimeout is not null)
+            initTimeout.Dispose();
+
+        initTimeout = default;
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+                processDispose();
+
+            _disposedValue = true;
+        }
+    }
+
+    protected virtual void processDispose()
+    {
+        isDestroyed = true;
+        clearInitTimer();
+    }
+
+    // Data ------------------------------------------------------------------------------------------------------------------
+
+    private string getCellValue(object? value)
+    {
+        string retValue = string.Empty;
+
+        if (value is not null && value.GetType() == typeof(int))
+        {
+            int intValue = Convert.ToInt32(value);
+
+            switch (intValue)
+            {
+                case 1:
+                    retValue = "⇊ Strong Sell";
+                    break;
+
+                case 2:
+                    retValue = "↘ Sell";
+                    break;
+
+                case 4:
+                    retValue = "↗ Buy";
+                    break;
+
+                case 5:
+                    retValue = "⇈ Strong Buy";
+                    break;
+
+                default:
+                    retValue = "⇄ Neutral";
+                    break;
+            }
+        }
+
+        return retValue;
+    }
+
+    private string? getCountryIcon(string? country)
+    {
+        string? retValue = country?.ToLower();
+
+        switch (retValue)
+        {
+            case "south korea":
+                retValue = "south-korea";
+                break;
+
+            case "united kingdom":
+                retValue = "uk";
+                break;
+
+            case "united states":
+                retValue = "usa";
+                break;
+        }
+
+        return retValue;
+    }
+
+    // Styling ---------------------------------------------------------------------------------------------------------------
+
+    private bool blueStyle(object? obj)
+    {
+        if (obj is not null && obj.GetType() == typeof(IntegralUIDataCell))
+        {
+            IntegralUIDataCell cell = (IntegralUIDataCell)obj;
+
+            if (cell.Value is not null && cell.Field == "Rating")
+                return (int)cell.Value > 3;
+        }
+
+        return false;
+    }
+
+    private bool evenOddStyle(object? obj, int index)
+    {
+        return index % 2 == 1;
+    }
+
+    private bool greenStyle(object? obj)
+    {
+        if (obj is not null && obj.GetType() == typeof(IntegralUIDataCell))
+        {
+            IntegralUIDataCell cell = (IntegralUIDataCell)obj;
+
+            if (cell.Value is not null && cell.Field != "Rating")
+            {
+                if (IntegralUIDataService.IsNumericType(cell.Value.GetType()))
+                    return Convert.ToDouble(cell.Value) > 2.5;
+            }
+        }
+
+        return false;
+    }
+
+    private bool redStyle(object? obj)
+    {
+        if (obj is not null && obj.GetType() == typeof(IntegralUIDataCell))
+        {
+            IntegralUIDataCell cell = (IntegralUIDataCell)obj;
+
+            if (cell.Value is not null)
+            {
+                if (cell.Field == "Rating")
+                    return (int)cell.Value < 3;
+                else if (IntegralUIDataService.IsNumericType(cell.Value.GetType()))
+                    return Convert.ToDouble(cell.Value) < 0;
+            }
+        }
+
+        return false;
+    }
+
+    // Update ----------------------------------------------------------------------------------------------------------------
+
+    private async Task updateData()
+    {
+        int countInterval = 0;
+        var taskDelayAmount = TimeSpan.FromSeconds(0.250);
+
+        if (gridRows is not null)
+        {
+            int numRows = gridRows.Count;
+
+            while (!isDestroyed)
+            {
+                // Change random set of records
+                Random rnd = new Random();
+                int numRecords = rnd.Next(1, numRows);
+
+                List<int> currentRecords = [];
+                while (currentRecords.Count < numRecords)
+                {
+                    int change = rnd.Next(1, numRows);
+                    if (currentRecords.IndexOf(change) < 0)
+                        currentRecords.Add(change);
+                }
+
+                // Change to Stock Values
+                int currentStockChange = rnd.Next(1, 5);
+                List<double> currentValues = [];
+                while (currentValues.Count < numRecords)
+                {
+                    int plusOrMinus = rnd.NextDouble() < 0.5 ? -1 : 1;
+                    double change = rnd.NextDouble() * currentStockChange * plusOrMinus;
+                    currentValues.Add(change);
+                }
+
+                // Change to Ratings
+                List<int> currentRatings = [];
+                while (currentRatings.Count < numRecords)
+                {
+                    int change = rnd.Next(1, 5);
+                    currentRatings.Add(change);
+                }
+
+                // Change to Volume
+                int currentVolumeChange = (int)(rnd.NextDouble() * 10000);
+                List<int> currentVolumes = [];
+                while (currentVolumes.Count < numRecords)
+                {
+                    int plusOrMinus = rnd.NextDouble() < 0.5 ? -1 : 1;
+                    int change = rnd.Next(1, numRecords) * currentVolumeChange * plusOrMinus;
+                    currentVolumes.Add(change);
+                }
+
+                // Change to P/E
+                double currentPEChange = (double)(rnd.Next(1, 5) * 0.1);
+                List<double> currentPEValues = [];
+                while (currentPEValues.Count < numRecords)
+                {
+                    int plusOrMinus = rnd.NextDouble() < 0.5 ? -1 : 1;
+                    double change = rnd.Next(1, numRecords) * currentPEChange * plusOrMinus;
+                    currentPEValues.Add(change);
+                }
+
+                for (int i = 0; i < currentRecords.Count; i++)
+                {
+                    int index = currentRecords[i];
+                    CustomData currentRow = gridRows[index];
+
+                    // Change
+                    currentRow.Change = currentValues[i];
+
+                    // Change %
+                    if (currentRow.Last > 0)
+                        currentRow.ChangePercent = currentValues[i] / currentRow.Last;
+
+                    // Last
+                    currentRow.Last += currentValues[i];
+
+                    // Rating
+                    if (countInterval % numRecords == 0)
+                        currentRow.Rating = currentRatings[i];
+
+                    // Volume
+                    currentRow.Volume = Math.Max(0, currentRow.Volume + currentVolumes[i]);
+
+                    // P/E
+                    if (countInterval % numRecords * 2 == 0)
+                        currentRow.PE = Math.Max(0, currentRow.PE + currentPEValues[i]);
+                }
+
+                gridRef?.UpdateView();
+
+                await Task.Delay(taskDelayAmount);
+                countInterval++;
+            }
+        }
+    }
+}
