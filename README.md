@@ -2,7 +2,7 @@
 
 IntegralUI for Blazor is UI library of advanced, customizable and high performance components for Blazor .NET. 
 
-![IntegralUI for Blazor 24.3](https://www.lidorsystems.com/products/integralui/blazor/integralui-blazor-243000.png)
+![IntegralUI for Blazor 24.3](https://github.com/user-attachments/assets/e85c1959-07d5-4b5e-9b8b-d00a4dcab025)
 
 Here is a brief overview of what is included:
 

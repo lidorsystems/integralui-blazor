@@ -15,7 +15,7 @@
     "ui",
     "blazor",
     "blazor-components",
-    "data-grid",
+    "datagrid",
     "grid",
     "treeview",
     "dotnet",
