@@ -5,7 +5,7 @@ v24.3
 - <strong>Panel</strong> - Generic container with option for content alignment
 - <strong>Validator</strong> - Displays a notification message when data is invalid
 - Optimized layout update for List, ListBox and TreeView components
-- Editor components now have IsValid property that when true applies a red outline
+- Editor components now have IsValid property that when false applies a red outline
 - ListView component allows column definitions in Razor and also optionally with data binding
 - In List component when MaxVisibleItems property is greater than 0, the max scroll size is now correctly adjusted
 - Select component now includes MouseWheelSpeed property that changes the scrolling speed of dropdown list
